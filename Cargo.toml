@@ -1,0 +1,28 @@
+[package]
+name = "vulkan-profiles-ash"
+version = "0.1.0"
+authors = ["Trent Shailer <trent.shailer@gmail.com>"]
+description = "Vulkan Profiles API bindings for Ash"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/trentshailer/vulkan-profiles-ash"
+edition = "2021"
+
+[dependencies]
+ash = { version = "0.38", default-features = false }
+
+[build-dependencies]
+# Compile the Vulkan Profiles library for linkage.
+cmake = { version = "0.1", optional = true }
+
+[features]
+default = ["linked", "debug", "std"]
+
+debug = ["ash/debug"] # Enable structs to derive Debug.
+std = ["ash/std"]     # Enable std support.
+
+# Compile and link the Vulkan Profiles library at compile time.
+linked = ["cmake", "ash/linked"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
