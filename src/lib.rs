@@ -125,29 +125,13 @@ impl VulkanProfiles {
         &self,
         layer_name: Option<&CStr>,
         profile_properties: &ProfileProperties,
-    ) -> VkResult<Option<Vec<BlockProperties>>> {
+    ) -> VkResult<(bool, Vec<BlockProperties>)> {
         let layer_name_ptr = match layer_name {
             Some(layer_name) => layer_name.as_ptr(),
             _ => core::ptr::null(),
         };
 
-        // Preliminary support check
         let mut supported = vk::FALSE;
-        let mut count = 0;
-        (self.profiles_fn.get_instance_profile_variants_support)(
-            layer_name_ptr,
-            profile_properties,
-            &mut supported,
-            &mut count,
-            core::ptr::null_mut(),
-        )
-        .result()?;
-
-        if supported == vk::FALSE {
-            return Ok(None);
-        }
-
-        // Read blocks
         let blocks = read_into_uninitialized_vector_mut(|count, data| {
             (self.profiles_fn.get_instance_profile_variants_support)(
                 layer_name_ptr,
@@ -159,8 +143,8 @@ impl VulkanProfiles {
         })?;
 
         match supported {
-            vk::TRUE => Ok(Some(blocks)),
-            _ => Ok(None),
+            vk::TRUE => Ok((true, blocks)),
+            _ => Ok((false, blocks)),
         }
     }
 
@@ -205,27 +189,8 @@ impl VulkanProfiles {
         instance: &ash::Instance,
         physical_device: vk::PhysicalDevice,
         profile_properties: &ProfileProperties,
-    ) -> VkResult<Option<Vec<BlockProperties>>> {
-        // Preliminary support check
+    ) -> VkResult<(bool, Vec<BlockProperties>)> {
         let mut supported = vk::FALSE;
-        let mut count = 0;
-        (self
-            .profiles_fn
-            .get_physical_device_profile_variants_support)(
-            instance.handle(),
-            physical_device,
-            profile_properties,
-            &mut supported,
-            &mut count,
-            core::ptr::null_mut(),
-        )
-        .result()?;
-
-        if supported == vk::FALSE {
-            return Ok(None);
-        }
-
-        // Read blocks
         let blocks = read_into_uninitialized_vector_mut(|count, data| {
             (self
                 .profiles_fn
@@ -240,8 +205,8 @@ impl VulkanProfiles {
         })?;
 
         match supported {
-            vk::TRUE => Ok(Some(blocks)),
-            _ => Ok(None),
+            vk::TRUE => Ok((true, blocks)),
+            _ => Ok((false, blocks)),
         }
     }
 
