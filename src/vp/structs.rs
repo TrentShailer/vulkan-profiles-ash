@@ -1,8 +1,8 @@
-use core::ffi::{self, CStr};
+use core::ffi::{self, CStr, FromBytesUntilNulError};
 
 use ash::vk::{self, CStrTooLargeForStaticArray};
 
-use crate::utils::write_c_str_slice_with_nul;
+use crate::utils::{wrap_c_str_slice_until_nul, write_c_str_slice_with_nul};
 
 pub const VP_MAX_PROFILE_NAME_SIZE: usize = 256;
 
@@ -30,6 +30,10 @@ impl ProfileProperties {
     pub fn spec_version(mut self, version: u32) -> Self {
         self.spec_version = version;
         self
+    }
+
+    pub fn profile_name_as_c_str(&self) -> Result<&CStr, FromBytesUntilNulError> {
+        wrap_c_str_slice_until_nul(&self.profile_name)
     }
 }
 #[cfg(feature = "debug")]
@@ -75,6 +79,10 @@ impl BlockProperties {
     pub fn block_name(mut self, name: &CStr) -> Result<Self, CStrTooLargeForStaticArray> {
         write_c_str_slice_with_nul(self.block_name.as_mut_slice(), name)?;
         Ok(self)
+    }
+
+    pub fn block_name_as_c_str(&self) -> Result<&CStr, FromBytesUntilNulError> {
+        wrap_c_str_slice_until_nul(&self.block_name)
     }
 }
 #[cfg(feature = "debug")]

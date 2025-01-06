@@ -26,6 +26,15 @@ pub(crate) fn write_c_str_slice_with_nul(
     Ok(())
 }
 
+#[inline]
+pub(crate) fn wrap_c_str_slice_until_nul(
+    str: &[core::ffi::c_char],
+) -> Result<&core::ffi::CStr, core::ffi::FromBytesUntilNulError> {
+    // SAFETY: The cast from c_char to u8 is ok because a c_char is always one byte.
+    let bytes = unsafe { core::slice::from_raw_parts(str.as_ptr().cast(), str.len()) };
+    core::ffi::CStr::from_bytes_until_nul(bytes)
+}
+
 /// Repeatedly calls `f` until it does not return [`vk::Result::INCOMPLETE`] anymore, ensuring all
 /// available data has been read into the vector.
 ///
