@@ -1,6 +1,6 @@
 [package]
 name = "vulkan-profiles-ash"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Trent Shailer <trent.shailer@gmail.com>"]
 description = "Vulkan Profiles API bindings for Ash"
 license = "MIT OR Apache-2.0"

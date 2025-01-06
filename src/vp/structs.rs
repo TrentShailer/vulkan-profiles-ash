@@ -16,7 +16,7 @@ pub struct ProfileProperties {
 impl Default for ProfileProperties {
     fn default() -> Self {
         Self {
-            profile_name: ['\0' as ffi::c_char; VP_MAX_PROFILE_NAME_SIZE],
+            profile_name: unsafe { core::mem::zeroed() },
             spec_version: Default::default(),
         }
     }
@@ -61,7 +61,7 @@ impl Default for BlockProperties {
         Self {
             profiles: Default::default(),
             api_version: Default::default(),
-            block_name: ['\0' as ffi::c_char; VP_MAX_PROFILE_NAME_SIZE],
+            block_name: unsafe { core::mem::zeroed() },
         }
     }
 }
