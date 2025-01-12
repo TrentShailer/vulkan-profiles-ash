@@ -1,0 +1,110 @@
+{
+    "$schema": "https://schema.khronos.org/vulkan/profiles-0.8.2-304.json#",
+    "capabilities": {
+        "supported_a": {},
+        "supported_b": {},
+        "device_unsupported_a": {
+            "features": {
+                "VkPhysicalDeviceShaderFloat16Int8Features": {
+                    "shaderInt8": true
+                }
+            }
+        },
+        "device_unsupported_b": {
+            "extensions": {
+                "VK_EXT_hdr_metadata": 1
+            }
+        },
+        "instance_unsupported_a": {
+            "extensions": {
+                "VK_KHR_display": 1
+            }
+        },
+        "instance_unsupported_b": {
+            "extensions": {
+                "VK_KHR_device_group_creation": 1
+            }
+        }
+    },
+    "profiles": {
+        "VP_VPA_test_variants_supported": {
+            "version": 1,
+            "api-version": "1.2.0",
+            "label": "Variants Profile",
+            "description": "Profile that has variants, is supported by instance and device.",
+            "capabilities": [
+                "supported_a",
+                [
+                    "supported_b",
+                    "device_unsupported_a",
+                    "instance_unsupported_a"
+                ]
+            ],
+            "contributors": {
+                "Trent Shailer": {
+                    "company": "N/A"
+                }
+            },
+            "history": [
+                {
+                    "revision": 1,
+                    "date": "2025-01-09",
+                    "author": "Trent Shailer",
+                    "comment": "Initial revision"
+                }
+            ]
+        },
+        "VP_VPA_test_variants_device_unsupported": {
+            "version": 1,
+            "api-version": "1.2.0",
+            "label": "Variants Profile N Device",
+            "description": "Profile that has variants, is supported by instance and not device.",
+            "capabilities": [
+                "supported_a",
+                [
+                    "device_unsupported_a",
+                    "device_unsupported_b"
+                ]
+            ],
+            "contributors": {
+                "Trent Shailer": {
+                    "company": "N/A"
+                }
+            },
+            "history": [
+                {
+                    "revision": 1,
+                    "date": "2025-01-09",
+                    "author": "Trent Shailer",
+                    "comment": "Initial revision"
+                }
+            ]
+        },
+        "VP_VPA_test_variants_instance_unsupported": {
+            "version": 1,
+            "api-version": "1.2.0",
+            "label": "Variants Profile N Instance",
+            "description": "Profile that has variants, is unsupported by instance.",
+            "capabilities": [
+                "supported_a",
+                [
+                    "instance_unsupported_a",
+                    "instance_unsupported_b"
+                ]
+            ],
+            "contributors": {
+                "Trent Shailer": {
+                    "company": "N/A"
+                }
+            },
+            "history": [
+                {
+                    "revision": 1,
+                    "date": "2025-01-09",
+                    "author": "Trent Shailer",
+                    "comment": "Initial revision"
+                }
+            ]
+        }
+    }
+}

@@ -1,25 +1,50 @@
-use std::env;
+use std::{env, path::Path};
 
 fn main() {
-    #[cfg(feature = "linked")]
-    {
-        // Rerun if relevant env/files changed
-        println!("cargo:rerun-if-changed=CMakeLists.txt");
-        println!("cargo:rerun-if-env-changed=VULKAN_SDK");
-        println!("cargo:rerun-if-env-changed=VULKAN_PROFILES_PATH");
+    // Rerun on env change.
+    println!("cargo:rerun-if-env-changed=VULKAN_SDK");
+    println!("cargo:rerun-if-env-changed=VULKAN_PROFILES_PATH");
 
-        // Rerun if the user's vulkan_profiles file has changed.
-        let profiles_path = env!("VULKAN_PROFILES_PATH");
-        println!("cargo:rerun-if-changed={profiles_path}/vulkan_profiles.cpp");
+    // Load the paths from env.
+    let vulkan_sdk = Path::new(env!("VULKAN_SDK"));
+    let profiles_dir = Path::new(env!("VULKAN_PROFILES_PATH"));
 
-        // Build the library
-        let vk_profiles_library = cmake::Config::new(".").build();
+    // If test/example flags are enabled, overwrite env paths.
+    #[cfg(feature = "test")]
+    let profiles_dir = Path::new("tests/vulkan_profiles");
+    #[cfg(feature = "example")]
+    let profiles_dir = Path::new("examples/vulkan_profiles");
 
-        // Link the library
-        println!(
-            "cargo:rustc-link-search=native={}",
-            vk_profiles_library.display()
-        );
-        println!("cargo:rustc-link-lib=static=vulkan_profiles_ash");
-    }
+    // Extend paths to correct file/directory.
+    let profiles_source = profiles_dir.join("vulkan_profiles.cpp");
+    let vulkan_include_dir = vulkan_sdk.join("Include");
+
+    // Rerun on source change.
+    println!(
+        "cargo:rerun-if-changed={}",
+        profiles_source.to_string_lossy()
+    );
+
+    // Setup cc build for the Vulkan Profiles Library.
+    let mut build = cc::Build::new();
+
+    build
+        .file(profiles_source)
+        .cpp(true)
+        .std("c++17")
+        .include(profiles_dir)
+        .include(&vulkan_include_dir)
+        .define("VP_USE_OBJECT", "1");
+
+    // Compile the library.
+    build.compile("vulkan_profiles_ash");
+
+    // Add 'fake' Vulkan Functions for testing.
+    #[cfg(feature = "test")]
+    cc::Build::new()
+        .file("tests/common/mock_vulkan_api.cpp")
+        .cpp(true)
+        .std("c++17")
+        .include(&vulkan_include_dir)
+        .compile("mock_vulkan_api");
 }

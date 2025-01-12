@@ -1,6 +1,6 @@
 [package]
-name = "vulkan-profiles-ash"
-version = "0.1.2"
+name = "vp-ash"
+version = "0.2.0"
 authors = ["Trent Shailer <trent.shailer@gmail.com>"]
 description = "Vulkan Profiles API bindings for Ash"
 license = "MIT OR Apache-2.0"
@@ -10,19 +10,22 @@ edition = "2021"
 [dependencies]
 ash = { version = "0.38", default-features = false }
 
+[dev-dependencies] # Dependencies for examples and tests.
+rayon = "1.10"
+rand_distr = "0.4"
+rand = "0.8"
+
 [build-dependencies]
-# Compile the Vulkan Profiles library for linkage.
-cmake = { version = "0.1", optional = true }
+
+cc = { version = "1.2" } # Compile the Vulkan Profiles library to be statically linked.
 
 [features]
-default = ["linked", "debug", "std"]
+default = ["link_vulkan", "debug", "std"]
 
-debug = ["ash/debug"] # Enable structs to derive Debug.
-std = ["ash/std"]     # Enable std support.
+link_vulkan = ["ash/linked"] # Statically link Vulkan.
+debug = ["ash/debug"]        # Enable structs to derive Debug.
+std = ["ash/std"]            # Enable std support.
 
-# Compile and link the Vulkan Profiles library at compile time.
-linked = ["cmake", "ash/linked"]
+test = ["default"] # Enable code paths in build.rs for testing the library.
 
-[package.metadata.docs.rs]
-all-features = true
-rustdoc-args = ["--cfg", "docsrs"]
+example = ["default"] # Enable code paths in build.rs for running the example.

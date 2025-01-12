@@ -38,11 +38,75 @@
 #include <memory>
 #include <map>
 
-#if defined(VK_VERSION_1_0)
-#define VP_VULKAN_PROFILES_ASH_custom_profile 1
-#define VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE_NAME "VP_VULKAN_PROFILES_ASH_custom_profile"
-#define VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE_SPEC_VERSION 1
-#define VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE_MIN_API_VERSION VK_MAKE_VERSION(1, 0, 0)
+#if defined(VK_VERSION_1_2)
+#define VP_VPA_test_fallback 1
+#define VP_VPA_TEST_FALLBACK_NAME "VP_VPA_test_fallback"
+#define VP_VPA_TEST_FALLBACK_SPEC_VERSION 1
+#define VP_VPA_TEST_FALLBACK_MIN_API_VERSION VK_MAKE_VERSION(1, 2, 0)
+#endif
+
+#if defined(VK_VERSION_1_2)
+#define VP_VPA_test_fallback_fallback 1
+#define VP_VPA_TEST_FALLBACK_FALLBACK_NAME "VP_VPA_test_fallback_fallback"
+#define VP_VPA_TEST_FALLBACK_FALLBACK_SPEC_VERSION 1
+#define VP_VPA_TEST_FALLBACK_FALLBACK_MIN_API_VERSION VK_MAKE_VERSION(1, 2, 0)
+#endif
+
+#if defined(VK_VERSION_1_2) && \
+    defined(VK_EXT_debug_utils) && \
+    defined(VK_KHR_synchronization2)
+#define VP_VPA_test_supported 1
+#define VP_VPA_TEST_SUPPORTED_NAME "VP_VPA_test_supported"
+#define VP_VPA_TEST_SUPPORTED_SPEC_VERSION 1
+#define VP_VPA_TEST_SUPPORTED_MIN_API_VERSION VK_MAKE_VERSION(1, 2, 0)
+#endif
+
+#if defined(VK_VERSION_1_2) && \
+    defined(VP_VPA_test_supported)
+#define VP_VPA_test_requires 1
+#define VP_VPA_TEST_REQUIRES_NAME "VP_VPA_test_requires"
+#define VP_VPA_TEST_REQUIRES_SPEC_VERSION 1
+#define VP_VPA_TEST_REQUIRES_MIN_API_VERSION VK_MAKE_VERSION(1, 2, 0)
+#endif
+
+#if defined(VK_VERSION_1_2)
+#define VP_VPA_test_unsupported_device 1
+#define VP_VPA_TEST_UNSUPPORTED_DEVICE_NAME "VP_VPA_test_unsupported_device"
+#define VP_VPA_TEST_UNSUPPORTED_DEVICE_SPEC_VERSION 1
+#define VP_VPA_TEST_UNSUPPORTED_DEVICE_MIN_API_VERSION VK_MAKE_VERSION(1, 2, 0)
+#endif
+
+#if defined(VK_VERSION_1_2) && \
+    defined(VK_KHR_display)
+#define VP_VPA_test_unsupported_instance 1
+#define VP_VPA_TEST_UNSUPPORTED_INSTANCE_NAME "VP_VPA_test_unsupported_instance"
+#define VP_VPA_TEST_UNSUPPORTED_INSTANCE_SPEC_VERSION 1
+#define VP_VPA_TEST_UNSUPPORTED_INSTANCE_MIN_API_VERSION VK_MAKE_VERSION(1, 2, 0)
+#endif
+
+#if defined(VK_VERSION_1_2) && \
+    defined(VK_EXT_hdr_metadata)
+#define VP_VPA_test_variants_device_unsupported 1
+#define VP_VPA_TEST_VARIANTS_DEVICE_UNSUPPORTED_NAME "VP_VPA_test_variants_device_unsupported"
+#define VP_VPA_TEST_VARIANTS_DEVICE_UNSUPPORTED_SPEC_VERSION 1
+#define VP_VPA_TEST_VARIANTS_DEVICE_UNSUPPORTED_MIN_API_VERSION VK_MAKE_VERSION(1, 2, 0)
+#endif
+
+#if defined(VK_VERSION_1_2) && \
+    defined(VK_KHR_device_group_creation) && \
+    defined(VK_KHR_display)
+#define VP_VPA_test_variants_instance_unsupported 1
+#define VP_VPA_TEST_VARIANTS_INSTANCE_UNSUPPORTED_NAME "VP_VPA_test_variants_instance_unsupported"
+#define VP_VPA_TEST_VARIANTS_INSTANCE_UNSUPPORTED_SPEC_VERSION 1
+#define VP_VPA_TEST_VARIANTS_INSTANCE_UNSUPPORTED_MIN_API_VERSION VK_MAKE_VERSION(1, 2, 0)
+#endif
+
+#if defined(VK_VERSION_1_2) && \
+    defined(VK_KHR_display)
+#define VP_VPA_test_variants_supported 1
+#define VP_VPA_TEST_VARIANTS_SUPPORTED_NAME "VP_VPA_test_variants_supported"
+#define VP_VPA_TEST_VARIANTS_SUPPORTED_SPEC_VERSION 1
+#define VP_VPA_TEST_VARIANTS_SUPPORTED_MIN_API_VERSION VK_MAKE_VERSION(1, 2, 0)
 #endif
 
 #define VP_HEADER_VERSION_COMPLETE VK_MAKE_API_VERSION(0, 2, 0, VK_HEADER_VERSION)
@@ -509,15 +573,351 @@ template <typename T>
 VPAPI_ATTR bool vpCheckFlags(const T& actual, const uint64_t expected) {
     return (actual & expected) == expected;
 }
-#ifdef VP_VULKAN_PROFILES_ASH_custom_profile
-namespace VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE {
+#ifdef VP_VPA_test_fallback
+namespace VP_VPA_TEST_FALLBACK {
+
+static const VkStructureType featureStructTypes[] = {
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES,
+};
+
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES: {
+                    VkPhysicalDeviceShaderFloat16Int8Features* s = static_cast<VkPhysicalDeviceShaderFloat16Int8Features*>(static_cast<void*>(p));
+                    s->shaderInt8 = VK_TRUE;
+                } break;
+                default: break;
+            }
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES: {
+                    VkPhysicalDeviceShaderFloat16Int8Features* s = static_cast<VkPhysicalDeviceShaderFloat16Int8Features*>(static_cast<void*>(p));
+                    ret = ret && (s->shaderInt8 == VK_TRUE);
+                } break;
+                default: break;
+            }
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        VkPhysicalDeviceShaderFloat16Int8Features physicalDeviceShaderFloat16Int8Features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES, nullptr };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&physicalDeviceShaderFloat16Int8Features));
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+};
+
+namespace baseline {
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        VkPhysicalDeviceShaderFloat16Int8Features physicalDeviceShaderFloat16Int8Features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES, nullptr };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&physicalDeviceShaderFloat16Int8Features));
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+};
+} //namespace baseline
+namespace advanced {
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES: {
+                    VkPhysicalDeviceShaderFloat16Int8Features* s = static_cast<VkPhysicalDeviceShaderFloat16Int8Features*>(static_cast<void*>(p));
+                    s->shaderInt8 = VK_TRUE;
+                } break;
+                default: break;
+            }
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES: {
+                    VkPhysicalDeviceShaderFloat16Int8Features* s = static_cast<VkPhysicalDeviceShaderFloat16Int8Features*>(static_cast<void*>(p));
+                    ret = ret && (s->shaderInt8 == VK_TRUE);
+                } break;
+                default: break;
+            }
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        VkPhysicalDeviceShaderFloat16Int8Features physicalDeviceShaderFloat16Int8Features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES, nullptr };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&physicalDeviceShaderFloat16Int8Features));
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+};
+} //namespace advanced
+} // namespace VP_VPA_TEST_FALLBACK
+#endif // VP_VPA_test_fallback
+
+#ifdef VP_VPA_test_fallback_fallback
+namespace VP_VPA_TEST_FALLBACK_FALLBACK {
+
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+};
+
+namespace baseline {
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+};
+} //namespace baseline
+} // namespace VP_VPA_TEST_FALLBACK_FALLBACK
+#endif // VP_VPA_test_fallback_fallback
+
+#ifdef VP_VPA_test_requires
+namespace VP_VPA_TEST_REQUIRES {
+
+static const VkStructureType featureStructTypes[] = {
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES,
+};
+
+static const VkExtensionProperties instanceExtensions[] = {
+    VkExtensionProperties{ VK_EXT_DEBUG_UTILS_EXTENSION_NAME, 1 },
+};
+
+static const VkExtensionProperties deviceExtensions[] = {
+    VkExtensionProperties{ VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME, 1 },
+};
+
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES: {
+                    VkPhysicalDeviceShaderFloat16Int8Features* s = static_cast<VkPhysicalDeviceShaderFloat16Int8Features*>(static_cast<void*>(p));
+                    s->shaderFloat16 = VK_TRUE;
+                } break;
+                default: break;
+            }
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES: {
+                    VkPhysicalDeviceShaderFloat16Int8Features* s = static_cast<VkPhysicalDeviceShaderFloat16Int8Features*>(static_cast<void*>(p));
+                    ret = ret && (s->shaderFloat16 == VK_TRUE);
+                } break;
+                default: break;
+            }
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        VkPhysicalDeviceShaderFloat16Int8Features physicalDeviceShaderFloat16Int8Features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES, nullptr };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&physicalDeviceShaderFloat16Int8Features));
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+};
+
+namespace baseline {
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        VkPhysicalDeviceShaderFloat16Int8Features physicalDeviceShaderFloat16Int8Features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES, nullptr };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&physicalDeviceShaderFloat16Int8Features));
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+};
+} //namespace baseline
+} // namespace VP_VPA_TEST_REQUIRES
+#endif // VP_VPA_test_requires
+
+#ifdef VP_VPA_test_supported
+namespace VP_VPA_TEST_SUPPORTED {
 
 static const VkStructureType featureStructTypes[] = {
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR,
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES,
 };
 
 static const VkStructureType propertyStructTypes[] = {
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2_KHR,
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_PROPERTIES,
+};
+
+static const VkStructureType formatStructTypes[] = {
+    VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_2_KHR,
+    VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_3_KHR,
+};
+
+static const VkExtensionProperties instanceExtensions[] = {
+    VkExtensionProperties{ VK_EXT_DEBUG_UTILS_EXTENSION_NAME, 1 },
+};
+
+static const VkExtensionProperties deviceExtensions[] = {
+    VkExtensionProperties{ VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME, 1 },
 };
 
 static const VpFeatureDesc featureDesc = {
@@ -525,7 +925,11 @@ static const VpFeatureDesc featureDesc = {
             switch (p->sType) {
                 case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR: {
                     VkPhysicalDeviceFeatures2KHR* s = static_cast<VkPhysicalDeviceFeatures2KHR*>(static_cast<void*>(p));
-                    s->features.robustBufferAccess = VK_TRUE;
+                    s->features.shaderFloat64 = VK_TRUE;
+                } break;
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES: {
+                    VkPhysicalDeviceShaderFloat16Int8Features* s = static_cast<VkPhysicalDeviceShaderFloat16Int8Features*>(static_cast<void*>(p));
+                    s->shaderFloat16 = VK_TRUE;
                 } break;
                 default: break;
             }
@@ -535,7 +939,11 @@ static const VpFeatureDesc featureDesc = {
             switch (p->sType) {
                 case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR: {
                     VkPhysicalDeviceFeatures2KHR* s = static_cast<VkPhysicalDeviceFeatures2KHR*>(static_cast<void*>(p));
-                    ret = ret && (s->features.robustBufferAccess == VK_TRUE);
+                    ret = ret && (s->features.shaderFloat64 == VK_TRUE);
+                } break;
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES: {
+                    VkPhysicalDeviceShaderFloat16Int8Features* s = static_cast<VkPhysicalDeviceShaderFloat16Int8Features*>(static_cast<void*>(p));
+                    ret = ret && (s->shaderFloat16 == VK_TRUE);
                 } break;
                 default: break;
             }
@@ -554,28 +962,44 @@ static const VpPropertyDesc propertyDesc = {
 
 static const VpStructChainerDesc chainerDesc = {
     [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
-        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(nullptr));
+        VkPhysicalDeviceShaderFloat16Int8Features physicalDeviceShaderFloat16Int8Features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES, nullptr };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&physicalDeviceShaderFloat16Int8Features));
         pfnCb(p, pUser);
     },
     [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
-        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(nullptr));
+        VkPhysicalDeviceSubgroupProperties physicalDeviceSubgroupProperties{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_PROPERTIES, nullptr };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&physicalDeviceSubgroupProperties));
         pfnCb(p, pUser);
     },
     [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
         pfnCb(p, pUser);
     },
     [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        VkFormatProperties3KHR formatProperties3KHR{ VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_3_KHR, nullptr };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&formatProperties3KHR));
         pfnCb(p, pUser);
     },
 };
 
-namespace custom_profile_requirements {
+namespace baseline {
+static const VkExtensionProperties instanceExtensions[] = {
+    VkExtensionProperties{ VK_EXT_DEBUG_UTILS_EXTENSION_NAME, 1 },
+};
+
+static const VkExtensionProperties deviceExtensions[] = {
+    VkExtensionProperties{ VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME, 1 },
+};
+
 static const VpFeatureDesc featureDesc = {
     [](VkBaseOutStructure* p) { (void)p;
             switch (p->sType) {
                 case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR: {
                     VkPhysicalDeviceFeatures2KHR* s = static_cast<VkPhysicalDeviceFeatures2KHR*>(static_cast<void*>(p));
-                    s->features.robustBufferAccess = VK_TRUE;
+                    s->features.shaderFloat64 = VK_TRUE;
+                } break;
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES: {
+                    VkPhysicalDeviceShaderFloat16Int8Features* s = static_cast<VkPhysicalDeviceShaderFloat16Int8Features*>(static_cast<void*>(p));
+                    s->shaderFloat16 = VK_TRUE;
                 } break;
                 default: break;
             }
@@ -585,7 +1009,11 @@ static const VpFeatureDesc featureDesc = {
             switch (p->sType) {
                 case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR: {
                     VkPhysicalDeviceFeatures2KHR* s = static_cast<VkPhysicalDeviceFeatures2KHR*>(static_cast<void*>(p));
-                    ret = ret && (s->features.robustBufferAccess == VK_TRUE);
+                    ret = ret && (s->features.shaderFloat64 == VK_TRUE);
+                } break;
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES: {
+                    VkPhysicalDeviceShaderFloat16Int8Features* s = static_cast<VkPhysicalDeviceShaderFloat16Int8Features*>(static_cast<void*>(p));
+                    ret = ret && (s->shaderFloat16 == VK_TRUE);
                 } break;
                 default: break;
             }
@@ -598,118 +1026,11 @@ static const VpPropertyDesc propertyDesc = {
             switch (p->sType) {
                 case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2_KHR: {
                     VkPhysicalDeviceProperties2KHR* s = static_cast<VkPhysicalDeviceProperties2KHR*>(static_cast<void*>(p));
-                    s->properties.limits.bufferImageGranularity = 131072;
-                    s->properties.limits.discreteQueuePriorities = 2;
-                    s->properties.limits.framebufferColorSampleCounts |= (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT);
-                    s->properties.limits.framebufferDepthSampleCounts |= (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT);
-                    s->properties.limits.framebufferNoAttachmentsSampleCounts |= (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT);
-                    s->properties.limits.framebufferStencilSampleCounts |= (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT);
-                    s->properties.limits.lineWidthGranularity = 1.0f;
-                    s->properties.limits.lineWidthRange[0] = 1.0f;
-                    s->properties.limits.lineWidthRange[1] = 1.0f;
-                    s->properties.limits.maxBoundDescriptorSets = 4;
-                    s->properties.limits.maxClipDistances = 0;
-                    s->properties.limits.maxColorAttachments = 4;
-                    s->properties.limits.maxCombinedClipAndCullDistances = 0;
-                    s->properties.limits.maxComputeSharedMemorySize = 16384;
-                    s->properties.limits.maxComputeWorkGroupCount[0] = 65535;
-                    s->properties.limits.maxComputeWorkGroupCount[1] = 65535;
-                    s->properties.limits.maxComputeWorkGroupCount[2] = 65535;
-                    s->properties.limits.maxComputeWorkGroupInvocations = 128;
-                    s->properties.limits.maxComputeWorkGroupSize[0] = 128;
-                    s->properties.limits.maxComputeWorkGroupSize[1] = 128;
-                    s->properties.limits.maxComputeWorkGroupSize[2] = 64;
-                    s->properties.limits.maxCullDistances = 0;
-                    s->properties.limits.maxDescriptorSetInputAttachments = 4;
-                    s->properties.limits.maxDescriptorSetSampledImages = 96;
-                    s->properties.limits.maxDescriptorSetSamplers = 96;
-                    s->properties.limits.maxDescriptorSetStorageBuffers = 24;
-                    s->properties.limits.maxDescriptorSetStorageBuffersDynamic = 4;
-                    s->properties.limits.maxDescriptorSetStorageImages = 24;
-                    s->properties.limits.maxDescriptorSetUniformBuffers = 72;
-                    s->properties.limits.maxDescriptorSetUniformBuffersDynamic = 8;
-                    s->properties.limits.maxDrawIndexedIndexValue = 16777216;
-                    s->properties.limits.maxDrawIndirectCount = 1;
-                    s->properties.limits.maxFragmentCombinedOutputResources = 4;
-                    s->properties.limits.maxFragmentDualSrcAttachments = 0;
-                    s->properties.limits.maxFragmentInputComponents = 64;
-                    s->properties.limits.maxFragmentOutputAttachments = 4;
-                    s->properties.limits.maxFramebufferHeight = 4096;
-                    s->properties.limits.maxFramebufferLayers = 256;
-                    s->properties.limits.maxFramebufferWidth = 4096;
-                    s->properties.limits.maxGeometryInputComponents = 0;
-                    s->properties.limits.maxGeometryOutputComponents = 0;
-                    s->properties.limits.maxGeometryOutputVertices = 0;
-                    s->properties.limits.maxGeometryShaderInvocations = 0;
-                    s->properties.limits.maxGeometryTotalOutputComponents = 0;
-                    s->properties.limits.maxImageArrayLayers = 256;
-                    s->properties.limits.maxImageDimension1D = 4096;
-                    s->properties.limits.maxImageDimension2D = 4096;
-                    s->properties.limits.maxImageDimension3D = 256;
-                    s->properties.limits.maxImageDimensionCube = 4096;
-                    s->properties.limits.maxInterpolationOffset = 0.0f;
-                    s->properties.limits.maxMemoryAllocationCount = 4096;
-                    s->properties.limits.maxPerStageDescriptorInputAttachments = 4;
-                    s->properties.limits.maxPerStageDescriptorSampledImages = 16;
-                    s->properties.limits.maxPerStageDescriptorSamplers = 16;
-                    s->properties.limits.maxPerStageDescriptorStorageBuffers = 4;
-                    s->properties.limits.maxPerStageDescriptorStorageImages = 4;
-                    s->properties.limits.maxPerStageDescriptorUniformBuffers = 12;
-                    s->properties.limits.maxPerStageResources = 128;
-                    s->properties.limits.maxPushConstantsSize = 128;
-                    s->properties.limits.maxSampleMaskWords = 1;
-                    s->properties.limits.maxSamplerAllocationCount = 4000;
-                    s->properties.limits.maxSamplerAnisotropy = 1;
-                    s->properties.limits.maxSamplerLodBias = 2;
-                    s->properties.limits.maxStorageBufferRange = 134217728;
-                    s->properties.limits.maxTessellationControlPerPatchOutputComponents = 0;
-                    s->properties.limits.maxTessellationControlPerVertexInputComponents = 0;
-                    s->properties.limits.maxTessellationControlPerVertexOutputComponents = 0;
-                    s->properties.limits.maxTessellationControlTotalOutputComponents = 0;
-                    s->properties.limits.maxTessellationEvaluationInputComponents = 0;
-                    s->properties.limits.maxTessellationEvaluationOutputComponents = 0;
-                    s->properties.limits.maxTessellationGenerationLevel = 0;
-                    s->properties.limits.maxTessellationPatchSize = 0;
-                    s->properties.limits.maxTexelBufferElements = 65536;
-                    s->properties.limits.maxTexelGatherOffset = 7;
-                    s->properties.limits.maxTexelOffset = 7;
-                    s->properties.limits.maxUniformBufferRange = 16384;
-                    s->properties.limits.maxVertexInputAttributeOffset = 2047;
-                    s->properties.limits.maxVertexInputAttributes = 16;
-                    s->properties.limits.maxVertexInputBindingStride = 2048;
-                    s->properties.limits.maxVertexInputBindings = 16;
-                    s->properties.limits.maxVertexOutputComponents = 64;
-                    s->properties.limits.maxViewportDimensions[0] = 4096;
-                    s->properties.limits.maxViewportDimensions[1] = 4096;
-                    s->properties.limits.maxViewports = 1;
-                    s->properties.limits.minInterpolationOffset = 0.0f;
-                    s->properties.limits.minMemoryMapAlignment = 64;
-                    s->properties.limits.minStorageBufferOffsetAlignment = 256;
-                    s->properties.limits.minTexelBufferOffsetAlignment = 256;
-                    s->properties.limits.minTexelGatherOffset = -8;
-                    s->properties.limits.minTexelOffset = -8;
-                    s->properties.limits.minUniformBufferOffsetAlignment = 256;
-                    s->properties.limits.mipmapPrecisionBits = 4;
-                    s->properties.limits.nonCoherentAtomSize = 256;
-                    s->properties.limits.pointSizeGranularity = 1.0f;
-                    s->properties.limits.pointSizeRange[0] = 1.0f;
-                    s->properties.limits.pointSizeRange[1] = 1.0f;
-                    s->properties.limits.sampledImageColorSampleCounts |= (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT);
-                    s->properties.limits.sampledImageDepthSampleCounts |= (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT);
-                    s->properties.limits.sampledImageIntegerSampleCounts |= (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT);
-                    s->properties.limits.sampledImageStencilSampleCounts |= (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT);
-                    s->properties.limits.sparseAddressSpaceSize = 0;
-                    s->properties.limits.storageImageSampleCounts |= (VK_SAMPLE_COUNT_1_BIT);
-                    s->properties.limits.subPixelInterpolationOffsetBits = 0;
-                    s->properties.limits.subPixelPrecisionBits = 4;
-                    s->properties.limits.subTexelPrecisionBits = 4;
-                    s->properties.limits.viewportBoundsRange[0] = -8192;
-                    s->properties.limits.viewportBoundsRange[1] = 8192;
-                    s->properties.limits.viewportSubPixelBits = 0;
-                    s->properties.sparseProperties.residencyNonResidentStrict = VK_FALSE;
-                    s->properties.sparseProperties.residencyStandard2DBlockShape = VK_FALSE;
-                    s->properties.sparseProperties.residencyStandard2DMultisampleBlockShape = VK_FALSE;
-                    s->properties.sparseProperties.residencyStandard3DBlockShape = VK_FALSE;
+                    s->properties.limits.maxImageDimension2D = 16384;
+                } break;
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_PROPERTIES: {
+                    VkPhysicalDeviceSubgroupProperties* s = static_cast<VkPhysicalDeviceSubgroupProperties*>(static_cast<void*>(p));
+                    s->supportedStages |= (VK_SHADER_STAGE_COMPUTE_BIT);
                 } break;
                 default: break;
             }
@@ -719,126 +1040,11 @@ static const VpPropertyDesc propertyDesc = {
             switch (p->sType) {
                 case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2_KHR: {
                     VkPhysicalDeviceProperties2KHR* s = static_cast<VkPhysicalDeviceProperties2KHR*>(static_cast<void*>(p));
-                    ret = ret && (s->properties.limits.bufferImageGranularity <= 131072);
-                    ret = ret && ((131072 % s->properties.limits.bufferImageGranularity) == 0);
-                    ret = ret && (s->properties.limits.discreteQueuePriorities >= 2);
-                    ret = ret && (vpCheckFlags(s->properties.limits.framebufferColorSampleCounts, (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT)));
-                    ret = ret && (vpCheckFlags(s->properties.limits.framebufferDepthSampleCounts, (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT)));
-                    ret = ret && (vpCheckFlags(s->properties.limits.framebufferNoAttachmentsSampleCounts, (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT)));
-                    ret = ret && (vpCheckFlags(s->properties.limits.framebufferStencilSampleCounts, (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT)));
-                    ret = ret && (s->properties.limits.lineWidthGranularity <= 1.0);
-                    ret = ret && (isMultiple(1.0, s->properties.limits.lineWidthGranularity));
-                    ret = ret && (s->properties.limits.lineWidthRange[0] <= 1.0);
-                    ret = ret && (s->properties.limits.lineWidthRange[1] >= 1.0);
-                    ret = ret && (s->properties.limits.maxBoundDescriptorSets >= 4);
-                    ret = ret && (s->properties.limits.maxClipDistances >= 0);
-                    ret = ret && (s->properties.limits.maxColorAttachments >= 4);
-                    ret = ret && (s->properties.limits.maxCombinedClipAndCullDistances >= 0);
-                    ret = ret && (s->properties.limits.maxComputeSharedMemorySize >= 16384);
-                    ret = ret && (s->properties.limits.maxComputeWorkGroupCount[0] >= 65535);
-                    ret = ret && (s->properties.limits.maxComputeWorkGroupCount[1] >= 65535);
-                    ret = ret && (s->properties.limits.maxComputeWorkGroupCount[2] >= 65535);
-                    ret = ret && (s->properties.limits.maxComputeWorkGroupInvocations >= 128);
-                    ret = ret && (s->properties.limits.maxComputeWorkGroupSize[0] >= 128);
-                    ret = ret && (s->properties.limits.maxComputeWorkGroupSize[1] >= 128);
-                    ret = ret && (s->properties.limits.maxComputeWorkGroupSize[2] >= 64);
-                    ret = ret && (s->properties.limits.maxCullDistances >= 0);
-                    ret = ret && (s->properties.limits.maxDescriptorSetInputAttachments >= 4);
-                    ret = ret && (s->properties.limits.maxDescriptorSetSampledImages >= 96);
-                    ret = ret && (s->properties.limits.maxDescriptorSetSamplers >= 96);
-                    ret = ret && (s->properties.limits.maxDescriptorSetStorageBuffers >= 24);
-                    ret = ret && (s->properties.limits.maxDescriptorSetStorageBuffersDynamic >= 4);
-                    ret = ret && (s->properties.limits.maxDescriptorSetStorageImages >= 24);
-                    ret = ret && (s->properties.limits.maxDescriptorSetUniformBuffers >= 72);
-                    ret = ret && (s->properties.limits.maxDescriptorSetUniformBuffersDynamic >= 8);
-                    ret = ret && (s->properties.limits.maxDrawIndexedIndexValue >= 16777216);
-                    ret = ret && (s->properties.limits.maxDrawIndirectCount >= 1);
-                    ret = ret && (s->properties.limits.maxFragmentCombinedOutputResources >= 4);
-                    ret = ret && (s->properties.limits.maxFragmentDualSrcAttachments >= 0);
-                    ret = ret && (s->properties.limits.maxFragmentInputComponents >= 64);
-                    ret = ret && (s->properties.limits.maxFragmentOutputAttachments >= 4);
-                    ret = ret && (s->properties.limits.maxFramebufferHeight >= 4096);
-                    ret = ret && (s->properties.limits.maxFramebufferLayers >= 256);
-                    ret = ret && (s->properties.limits.maxFramebufferWidth >= 4096);
-                    ret = ret && (s->properties.limits.maxGeometryInputComponents >= 0);
-                    ret = ret && (s->properties.limits.maxGeometryOutputComponents >= 0);
-                    ret = ret && (s->properties.limits.maxGeometryOutputVertices >= 0);
-                    ret = ret && (s->properties.limits.maxGeometryShaderInvocations >= 0);
-                    ret = ret && (s->properties.limits.maxGeometryTotalOutputComponents >= 0);
-                    ret = ret && (s->properties.limits.maxImageArrayLayers >= 256);
-                    ret = ret && (s->properties.limits.maxImageDimension1D >= 4096);
-                    ret = ret && (s->properties.limits.maxImageDimension2D >= 4096);
-                    ret = ret && (s->properties.limits.maxImageDimension3D >= 256);
-                    ret = ret && (s->properties.limits.maxImageDimensionCube >= 4096);
-                    ret = ret && (s->properties.limits.maxInterpolationOffset >= 0.0);
-                    ret = ret && (s->properties.limits.maxMemoryAllocationCount >= 4096);
-                    ret = ret && (s->properties.limits.maxPerStageDescriptorInputAttachments >= 4);
-                    ret = ret && (s->properties.limits.maxPerStageDescriptorSampledImages >= 16);
-                    ret = ret && (s->properties.limits.maxPerStageDescriptorSamplers >= 16);
-                    ret = ret && (s->properties.limits.maxPerStageDescriptorStorageBuffers >= 4);
-                    ret = ret && (s->properties.limits.maxPerStageDescriptorStorageImages >= 4);
-                    ret = ret && (s->properties.limits.maxPerStageDescriptorUniformBuffers >= 12);
-                    ret = ret && (s->properties.limits.maxPerStageResources >= 128);
-                    ret = ret && (s->properties.limits.maxPushConstantsSize >= 128);
-                    ret = ret && (s->properties.limits.maxSampleMaskWords >= 1);
-                    ret = ret && (s->properties.limits.maxSamplerAllocationCount >= 4000);
-                    ret = ret && (s->properties.limits.maxSamplerAnisotropy >= 1);
-                    ret = ret && (s->properties.limits.maxSamplerLodBias >= 2);
-                    ret = ret && (s->properties.limits.maxStorageBufferRange >= 134217728);
-                    ret = ret && (s->properties.limits.maxTessellationControlPerPatchOutputComponents >= 0);
-                    ret = ret && (s->properties.limits.maxTessellationControlPerVertexInputComponents >= 0);
-                    ret = ret && (s->properties.limits.maxTessellationControlPerVertexOutputComponents >= 0);
-                    ret = ret && (s->properties.limits.maxTessellationControlTotalOutputComponents >= 0);
-                    ret = ret && (s->properties.limits.maxTessellationEvaluationInputComponents >= 0);
-                    ret = ret && (s->properties.limits.maxTessellationEvaluationOutputComponents >= 0);
-                    ret = ret && (s->properties.limits.maxTessellationGenerationLevel >= 0);
-                    ret = ret && (s->properties.limits.maxTessellationPatchSize >= 0);
-                    ret = ret && (s->properties.limits.maxTexelBufferElements >= 65536);
-                    ret = ret && (s->properties.limits.maxTexelGatherOffset >= 7);
-                    ret = ret && (s->properties.limits.maxTexelOffset >= 7);
-                    ret = ret && (s->properties.limits.maxUniformBufferRange >= 16384);
-                    ret = ret && (s->properties.limits.maxVertexInputAttributeOffset >= 2047);
-                    ret = ret && (s->properties.limits.maxVertexInputAttributes >= 16);
-                    ret = ret && (s->properties.limits.maxVertexInputBindingStride >= 2048);
-                    ret = ret && (s->properties.limits.maxVertexInputBindings >= 16);
-                    ret = ret && (s->properties.limits.maxVertexOutputComponents >= 64);
-                    ret = ret && (s->properties.limits.maxViewportDimensions[0] >= 4096);
-                    ret = ret && (s->properties.limits.maxViewportDimensions[1] >= 4096);
-                    ret = ret && (s->properties.limits.maxViewports >= 1);
-                    ret = ret && (s->properties.limits.minInterpolationOffset <= 0.0);
-                    ret = ret && (s->properties.limits.minMemoryMapAlignment <= 64);
-                    ret = ret && ((s->properties.limits.minMemoryMapAlignment & (s->properties.limits.minMemoryMapAlignment - 1)) == 0);
-                    ret = ret && (s->properties.limits.minStorageBufferOffsetAlignment <= 256);
-                    ret = ret && ((s->properties.limits.minStorageBufferOffsetAlignment & (s->properties.limits.minStorageBufferOffsetAlignment - 1)) == 0);
-                    ret = ret && (s->properties.limits.minTexelBufferOffsetAlignment <= 256);
-                    ret = ret && ((s->properties.limits.minTexelBufferOffsetAlignment & (s->properties.limits.minTexelBufferOffsetAlignment - 1)) == 0);
-                    ret = ret && (s->properties.limits.minTexelGatherOffset <= -8);
-                    ret = ret && (s->properties.limits.minTexelOffset <= -8);
-                    ret = ret && (s->properties.limits.minUniformBufferOffsetAlignment <= 256);
-                    ret = ret && ((s->properties.limits.minUniformBufferOffsetAlignment & (s->properties.limits.minUniformBufferOffsetAlignment - 1)) == 0);
-                    ret = ret && (s->properties.limits.mipmapPrecisionBits >= 4);
-                    ret = ret && (s->properties.limits.nonCoherentAtomSize <= 256);
-                    ret = ret && ((s->properties.limits.nonCoherentAtomSize & (s->properties.limits.nonCoherentAtomSize - 1)) == 0);
-                    ret = ret && (s->properties.limits.pointSizeGranularity <= 1.0);
-                    ret = ret && (isMultiple(1.0, s->properties.limits.pointSizeGranularity));
-                    ret = ret && (s->properties.limits.pointSizeRange[0] <= 1.0);
-                    ret = ret && (s->properties.limits.pointSizeRange[1] >= 1.0);
-                    ret = ret && (vpCheckFlags(s->properties.limits.sampledImageColorSampleCounts, (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT)));
-                    ret = ret && (vpCheckFlags(s->properties.limits.sampledImageDepthSampleCounts, (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT)));
-                    ret = ret && (vpCheckFlags(s->properties.limits.sampledImageIntegerSampleCounts, (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT)));
-                    ret = ret && (vpCheckFlags(s->properties.limits.sampledImageStencilSampleCounts, (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT)));
-                    ret = ret && (s->properties.limits.sparseAddressSpaceSize >= 0);
-                    ret = ret && (vpCheckFlags(s->properties.limits.storageImageSampleCounts, (VK_SAMPLE_COUNT_1_BIT)));
-                    ret = ret && (s->properties.limits.subPixelInterpolationOffsetBits >= 0);
-                    ret = ret && (s->properties.limits.subPixelPrecisionBits >= 4);
-                    ret = ret && (s->properties.limits.subTexelPrecisionBits >= 4);
-                    ret = ret && (s->properties.limits.viewportBoundsRange[0] <= -8192);
-                    ret = ret && (s->properties.limits.viewportBoundsRange[1] >= 8192);
-                    ret = ret && (s->properties.limits.viewportSubPixelBits >= 0);
-                    ret = ret && (vpCheckFlags(s->properties.sparseProperties.residencyNonResidentStrict, VK_FALSE));
-                    ret = ret && (vpCheckFlags(s->properties.sparseProperties.residencyStandard2DBlockShape, VK_FALSE));
-                    ret = ret && (vpCheckFlags(s->properties.sparseProperties.residencyStandard2DMultisampleBlockShape, VK_FALSE));
-                    ret = ret && (vpCheckFlags(s->properties.sparseProperties.residencyStandard3DBlockShape, VK_FALSE));
+                    ret = ret && (s->properties.limits.maxImageDimension2D >= 16384);
+                } break;
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_PROPERTIES: {
+                    VkPhysicalDeviceSubgroupProperties* s = static_cast<VkPhysicalDeviceSubgroupProperties*>(static_cast<void*>(p));
+                    ret = ret && (vpCheckFlags(s->supportedStages, (VK_SHADER_STAGE_COMPUTE_BIT)));
                 } break;
                 default: break;
             }
@@ -846,13 +1052,106 @@ static const VpPropertyDesc propertyDesc = {
     }
 };
 
+static const VpFormatDesc formatDesc[] = {
+    {
+        VK_FORMAT_R8G8B8A8_UNORM,
+        [](VkBaseOutStructure* p) { (void)p;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_2_KHR: {
+                    VkFormatProperties2KHR* s = static_cast<VkFormatProperties2KHR*>(static_cast<void*>(p));
+                    s->formatProperties.bufferFeatures |= (VK_FORMAT_FEATURE_STORAGE_TEXEL_BUFFER_BIT);
+                    s->formatProperties.linearTilingFeatures |= (VK_FORMAT_FEATURE_TRANSFER_DST_BIT);
+                    s->formatProperties.optimalTilingFeatures |= (VK_FORMAT_FEATURE_TRANSFER_SRC_BIT);
+                } break;
+                default: break;
+            }
+        },
+        [](VkBaseOutStructure* p) -> bool { (void)p;
+            bool ret = true;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_2_KHR: {
+                    VkFormatProperties2KHR* s = static_cast<VkFormatProperties2KHR*>(static_cast<void*>(p));
+                    ret = ret && (vpCheckFlags(s->formatProperties.bufferFeatures, (VK_FORMAT_FEATURE_STORAGE_TEXEL_BUFFER_BIT)));
+                    ret = ret && (vpCheckFlags(s->formatProperties.linearTilingFeatures, (VK_FORMAT_FEATURE_TRANSFER_DST_BIT)));
+                    ret = ret && (vpCheckFlags(s->formatProperties.optimalTilingFeatures, (VK_FORMAT_FEATURE_TRANSFER_SRC_BIT)));
+                } break;
+                default: break;
+            }
+            return ret;
+        }
+    },
+};
+
 static const VpStructChainerDesc chainerDesc = {
     [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
-        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(nullptr));
+        VkPhysicalDeviceShaderFloat16Int8Features physicalDeviceShaderFloat16Int8Features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES, nullptr };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&physicalDeviceShaderFloat16Int8Features));
         pfnCb(p, pUser);
     },
     [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
-        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(nullptr));
+        VkPhysicalDeviceSubgroupProperties physicalDeviceSubgroupProperties{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_PROPERTIES, nullptr };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&physicalDeviceSubgroupProperties));
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        VkFormatProperties3KHR formatProperties3KHR{ VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_3_KHR, nullptr };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&formatProperties3KHR));
+        pfnCb(p, pUser);
+    },
+};
+} //namespace baseline
+} // namespace VP_VPA_TEST_SUPPORTED
+#endif // VP_VPA_test_supported
+
+#ifdef VP_VPA_test_unsupported_device
+namespace VP_VPA_TEST_UNSUPPORTED_DEVICE {
+
+static const VkStructureType featureStructTypes[] = {
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES,
+};
+
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES: {
+                    VkPhysicalDeviceShaderFloat16Int8Features* s = static_cast<VkPhysicalDeviceShaderFloat16Int8Features*>(static_cast<void*>(p));
+                    s->shaderInt8 = VK_TRUE;
+                } break;
+                default: break;
+            }
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES: {
+                    VkPhysicalDeviceShaderFloat16Int8Features* s = static_cast<VkPhysicalDeviceShaderFloat16Int8Features*>(static_cast<void*>(p));
+                    ret = ret && (s->shaderInt8 == VK_TRUE);
+                } break;
+                default: break;
+            }
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        VkPhysicalDeviceShaderFloat16Int8Features physicalDeviceShaderFloat16Int8Features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES, nullptr };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&physicalDeviceShaderFloat16Int8Features));
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
         pfnCb(p, pUser);
     },
     [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
@@ -862,13 +1161,568 @@ static const VpStructChainerDesc chainerDesc = {
         pfnCb(p, pUser);
     },
 };
-} //namespace custom_profile_requirements
-} // namespace VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE
-#endif // VP_VULKAN_PROFILES_ASH_custom_profile
+
+namespace baseline {
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES: {
+                    VkPhysicalDeviceShaderFloat16Int8Features* s = static_cast<VkPhysicalDeviceShaderFloat16Int8Features*>(static_cast<void*>(p));
+                    s->shaderInt8 = VK_TRUE;
+                } break;
+                default: break;
+            }
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES: {
+                    VkPhysicalDeviceShaderFloat16Int8Features* s = static_cast<VkPhysicalDeviceShaderFloat16Int8Features*>(static_cast<void*>(p));
+                    ret = ret && (s->shaderInt8 == VK_TRUE);
+                } break;
+                default: break;
+            }
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        VkPhysicalDeviceShaderFloat16Int8Features physicalDeviceShaderFloat16Int8Features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES, nullptr };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&physicalDeviceShaderFloat16Int8Features));
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+};
+} //namespace baseline
+} // namespace VP_VPA_TEST_UNSUPPORTED_DEVICE
+#endif // VP_VPA_test_unsupported_device
+
+#ifdef VP_VPA_test_unsupported_instance
+namespace VP_VPA_TEST_UNSUPPORTED_INSTANCE {
+
+static const VkExtensionProperties instanceExtensions[] = {
+    VkExtensionProperties{ VK_KHR_DISPLAY_EXTENSION_NAME, 1 },
+};
+
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+};
+
+namespace baseline {
+static const VkExtensionProperties instanceExtensions[] = {
+    VkExtensionProperties{ VK_KHR_DISPLAY_EXTENSION_NAME, 1 },
+};
+
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+};
+} //namespace baseline
+} // namespace VP_VPA_TEST_UNSUPPORTED_INSTANCE
+#endif // VP_VPA_test_unsupported_instance
+
+#ifdef VP_VPA_test_variants_device_unsupported
+namespace VP_VPA_TEST_VARIANTS_DEVICE_UNSUPPORTED {
+
+static const VkStructureType featureStructTypes[] = {
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES,
+};
+
+namespace supported_a {
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        VkPhysicalDeviceShaderFloat16Int8Features physicalDeviceShaderFloat16Int8Features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES, nullptr };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&physicalDeviceShaderFloat16Int8Features));
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+};
+} //namespace supported_a
+namespace device_unsupported_a {
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES: {
+                    VkPhysicalDeviceShaderFloat16Int8Features* s = static_cast<VkPhysicalDeviceShaderFloat16Int8Features*>(static_cast<void*>(p));
+                    s->shaderInt8 = VK_TRUE;
+                } break;
+                default: break;
+            }
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES: {
+                    VkPhysicalDeviceShaderFloat16Int8Features* s = static_cast<VkPhysicalDeviceShaderFloat16Int8Features*>(static_cast<void*>(p));
+                    ret = ret && (s->shaderInt8 == VK_TRUE);
+                } break;
+                default: break;
+            }
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        VkPhysicalDeviceShaderFloat16Int8Features physicalDeviceShaderFloat16Int8Features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES, nullptr };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&physicalDeviceShaderFloat16Int8Features));
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+};
+} //namespace device_unsupported_a
+namespace device_unsupported_b {
+static const VkExtensionProperties deviceExtensions[] = {
+    VkExtensionProperties{ VK_EXT_HDR_METADATA_EXTENSION_NAME, 1 },
+};
+
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        VkPhysicalDeviceShaderFloat16Int8Features physicalDeviceShaderFloat16Int8Features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES, nullptr };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&physicalDeviceShaderFloat16Int8Features));
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+};
+} //namespace device_unsupported_b
+} // namespace VP_VPA_TEST_VARIANTS_DEVICE_UNSUPPORTED
+#endif // VP_VPA_test_variants_device_unsupported
+
+#ifdef VP_VPA_test_variants_instance_unsupported
+namespace VP_VPA_TEST_VARIANTS_INSTANCE_UNSUPPORTED {
+
+namespace supported_a {
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+};
+} //namespace supported_a
+namespace instance_unsupported_a {
+static const VkExtensionProperties instanceExtensions[] = {
+    VkExtensionProperties{ VK_KHR_DISPLAY_EXTENSION_NAME, 1 },
+};
+
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+};
+} //namespace instance_unsupported_a
+namespace instance_unsupported_b {
+static const VkExtensionProperties instanceExtensions[] = {
+    VkExtensionProperties{ VK_KHR_DEVICE_GROUP_CREATION_EXTENSION_NAME, 1 },
+};
+
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+};
+} //namespace instance_unsupported_b
+} // namespace VP_VPA_TEST_VARIANTS_INSTANCE_UNSUPPORTED
+#endif // VP_VPA_test_variants_instance_unsupported
+
+#ifdef VP_VPA_test_variants_supported
+namespace VP_VPA_TEST_VARIANTS_SUPPORTED {
+
+static const VkStructureType featureStructTypes[] = {
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES,
+};
+
+namespace supported_a {
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        VkPhysicalDeviceShaderFloat16Int8Features physicalDeviceShaderFloat16Int8Features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES, nullptr };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&physicalDeviceShaderFloat16Int8Features));
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+};
+} //namespace supported_a
+namespace supported_b {
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        VkPhysicalDeviceShaderFloat16Int8Features physicalDeviceShaderFloat16Int8Features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES, nullptr };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&physicalDeviceShaderFloat16Int8Features));
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+};
+} //namespace supported_b
+namespace device_unsupported_a {
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES: {
+                    VkPhysicalDeviceShaderFloat16Int8Features* s = static_cast<VkPhysicalDeviceShaderFloat16Int8Features*>(static_cast<void*>(p));
+                    s->shaderInt8 = VK_TRUE;
+                } break;
+                default: break;
+            }
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES: {
+                    VkPhysicalDeviceShaderFloat16Int8Features* s = static_cast<VkPhysicalDeviceShaderFloat16Int8Features*>(static_cast<void*>(p));
+                    ret = ret && (s->shaderInt8 == VK_TRUE);
+                } break;
+                default: break;
+            }
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        VkPhysicalDeviceShaderFloat16Int8Features physicalDeviceShaderFloat16Int8Features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES, nullptr };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&physicalDeviceShaderFloat16Int8Features));
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+};
+} //namespace device_unsupported_a
+namespace instance_unsupported_a {
+static const VkExtensionProperties instanceExtensions[] = {
+    VkExtensionProperties{ VK_KHR_DISPLAY_EXTENSION_NAME, 1 },
+};
+
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        VkPhysicalDeviceShaderFloat16Int8Features physicalDeviceShaderFloat16Int8Features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES, nullptr };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&physicalDeviceShaderFloat16Int8Features));
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+};
+} //namespace instance_unsupported_a
+} // namespace VP_VPA_TEST_VARIANTS_SUPPORTED
+#endif // VP_VPA_test_variants_supported
 
 
-#ifdef VP_VULKAN_PROFILES_ASH_custom_profile
-namespace VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE {
+#ifdef VP_VPA_test_fallback
+namespace VP_VPA_TEST_FALLBACK {
     static const VpVariantDesc mergedCapabilities[] = {
         {
         "MERGED",
@@ -886,44 +1740,591 @@ namespace VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE {
         },
     };
 
-    namespace custom_profile_requirements {
+    namespace baseline {
         static const VpVariantDesc variants[] = {
             {
-                "custom_profile_requirements",
-                0, nullptr,
-                0, nullptr,
-                static_cast<uint32_t>(std::size(featureStructTypes)), featureStructTypes,
-                custom_profile_requirements::featureDesc,
-                static_cast<uint32_t>(std::size(propertyStructTypes)), propertyStructTypes,
-                custom_profile_requirements::propertyDesc,
+                "baseline",
                 0, nullptr,
                 0, nullptr,
                 0, nullptr,
+                baseline::featureDesc,
                 0, nullptr,
-                custom_profile_requirements::chainerDesc,
+                baseline::propertyDesc,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                baseline::chainerDesc,
             },
         };
         static const uint32_t variantCount = static_cast<uint32_t>(std::size(variants));
-    } // namespace custom_profile_requirements
+    } // namespace baseline
+
+    namespace advanced {
+        static const VpVariantDesc variants[] = {
+            {
+                "advanced",
+                0, nullptr,
+                0, nullptr,
+                static_cast<uint32_t>(std::size(featureStructTypes)), featureStructTypes,
+                advanced::featureDesc,
+                0, nullptr,
+                advanced::propertyDesc,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                advanced::chainerDesc,
+            },
+        };
+        static const uint32_t variantCount = static_cast<uint32_t>(std::size(variants));
+    } // namespace advanced
 
     static const VpCapabilitiesDesc capabilities[] = {
-        { custom_profile_requirements::variantCount, custom_profile_requirements::variants },
+        { baseline::variantCount, baseline::variants },
+        { advanced::variantCount, advanced::variants },
     };
     static const uint32_t capabilityCount = static_cast<uint32_t>(std::size(capabilities));
-} // namespace VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE
-#endif //VP_VULKAN_PROFILES_ASH_custom_profile
+
+    static const VpProfileProperties fallbacks[] = {
+        {VP_VPA_TEST_FALLBACK_FALLBACK_NAME, VP_VPA_TEST_FALLBACK_FALLBACK_SPEC_VERSION},
+    };
+    static const uint32_t fallbackCount = static_cast<uint32_t>(std::size(fallbacks));
+} // namespace VP_VPA_TEST_FALLBACK
+#endif //VP_VPA_test_fallback
+
+#ifdef VP_VPA_test_fallback_fallback
+namespace VP_VPA_TEST_FALLBACK_FALLBACK {
+    static const VpVariantDesc mergedCapabilities[] = {
+        {
+        "MERGED",
+        0, nullptr,
+        0, nullptr,
+        0, nullptr,
+            featureDesc,
+        0, nullptr,
+            propertyDesc,
+        0, nullptr,
+        0, nullptr,
+        0, nullptr,
+        0, nullptr,
+        chainerDesc,
+        },
+    };
+
+    namespace baseline {
+        static const VpVariantDesc variants[] = {
+            {
+                "baseline",
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                baseline::featureDesc,
+                0, nullptr,
+                baseline::propertyDesc,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                baseline::chainerDesc,
+            },
+        };
+        static const uint32_t variantCount = static_cast<uint32_t>(std::size(variants));
+    } // namespace baseline
+
+    static const VpCapabilitiesDesc capabilities[] = {
+        { baseline::variantCount, baseline::variants },
+    };
+    static const uint32_t capabilityCount = static_cast<uint32_t>(std::size(capabilities));
+} // namespace VP_VPA_TEST_FALLBACK_FALLBACK
+#endif //VP_VPA_test_fallback_fallback
+
+#ifdef VP_VPA_test_requires
+namespace VP_VPA_TEST_REQUIRES {
+    static const VpVariantDesc mergedCapabilities[] = {
+        {
+        "MERGED",
+        static_cast<uint32_t>(std::size(instanceExtensions)), instanceExtensions,
+        static_cast<uint32_t>(std::size(deviceExtensions)), deviceExtensions,
+        static_cast<uint32_t>(std::size(featureStructTypes)), featureStructTypes,
+            featureDesc,
+        0, nullptr,
+            propertyDesc,
+        0, nullptr,
+        0, nullptr,
+        0, nullptr,
+        0, nullptr,
+        chainerDesc,
+        },
+    };
+
+    namespace baseline {
+        static const VpVariantDesc variants[] = {
+            {
+                "baseline",
+                0, nullptr,
+                0, nullptr,
+                static_cast<uint32_t>(std::size(featureStructTypes)), featureStructTypes,
+                baseline::featureDesc,
+                0, nullptr,
+                baseline::propertyDesc,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                baseline::chainerDesc,
+            },
+        };
+        static const uint32_t variantCount = static_cast<uint32_t>(std::size(variants));
+    } // namespace baseline
+
+    static const VpCapabilitiesDesc capabilities[] = {
+        { baseline::variantCount, baseline::variants },
+    };
+    static const uint32_t capabilityCount = static_cast<uint32_t>(std::size(capabilities));
+
+    static const VpProfileProperties profiles[] = {
+        {VP_VPA_TEST_SUPPORTED_NAME, VP_VPA_TEST_SUPPORTED_SPEC_VERSION},
+    };
+    static const uint32_t profileCount = static_cast<uint32_t>(std::size(profiles));
+} // namespace VP_VPA_TEST_REQUIRES
+#endif //VP_VPA_test_requires
+
+#ifdef VP_VPA_test_supported
+namespace VP_VPA_TEST_SUPPORTED {
+    static const VpVariantDesc mergedCapabilities[] = {
+        {
+        "MERGED",
+        static_cast<uint32_t>(std::size(instanceExtensions)), instanceExtensions,
+        static_cast<uint32_t>(std::size(deviceExtensions)), deviceExtensions,
+        static_cast<uint32_t>(std::size(featureStructTypes)), featureStructTypes,
+            featureDesc,
+        0, nullptr,
+            propertyDesc,
+        0, nullptr,
+        0, nullptr,
+        0, nullptr,
+        0, nullptr,
+        chainerDesc,
+        },
+    };
+
+    namespace baseline {
+        static const VpVariantDesc variants[] = {
+            {
+                "baseline",
+                static_cast<uint32_t>(std::size(baseline::instanceExtensions)), baseline::instanceExtensions,
+                static_cast<uint32_t>(std::size(baseline::deviceExtensions)), baseline::deviceExtensions,
+                static_cast<uint32_t>(std::size(featureStructTypes)), featureStructTypes,
+                baseline::featureDesc,
+                static_cast<uint32_t>(std::size(propertyStructTypes)), propertyStructTypes,
+                baseline::propertyDesc,
+                0, nullptr,
+                0, nullptr,
+                static_cast<uint32_t>(std::size(formatStructTypes)), formatStructTypes,
+                static_cast<uint32_t>(std::size(baseline::formatDesc)), baseline::formatDesc,
+                baseline::chainerDesc,
+            },
+        };
+        static const uint32_t variantCount = static_cast<uint32_t>(std::size(variants));
+    } // namespace baseline
+
+    static const VpCapabilitiesDesc capabilities[] = {
+        { baseline::variantCount, baseline::variants },
+    };
+    static const uint32_t capabilityCount = static_cast<uint32_t>(std::size(capabilities));
+} // namespace VP_VPA_TEST_SUPPORTED
+#endif //VP_VPA_test_supported
+
+#ifdef VP_VPA_test_unsupported_device
+namespace VP_VPA_TEST_UNSUPPORTED_DEVICE {
+    static const VpVariantDesc mergedCapabilities[] = {
+        {
+        "MERGED",
+        0, nullptr,
+        0, nullptr,
+        static_cast<uint32_t>(std::size(featureStructTypes)), featureStructTypes,
+            featureDesc,
+        0, nullptr,
+            propertyDesc,
+        0, nullptr,
+        0, nullptr,
+        0, nullptr,
+        0, nullptr,
+        chainerDesc,
+        },
+    };
+
+    namespace baseline {
+        static const VpVariantDesc variants[] = {
+            {
+                "baseline",
+                0, nullptr,
+                0, nullptr,
+                static_cast<uint32_t>(std::size(featureStructTypes)), featureStructTypes,
+                baseline::featureDesc,
+                0, nullptr,
+                baseline::propertyDesc,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                baseline::chainerDesc,
+            },
+        };
+        static const uint32_t variantCount = static_cast<uint32_t>(std::size(variants));
+    } // namespace baseline
+
+    static const VpCapabilitiesDesc capabilities[] = {
+        { baseline::variantCount, baseline::variants },
+    };
+    static const uint32_t capabilityCount = static_cast<uint32_t>(std::size(capabilities));
+} // namespace VP_VPA_TEST_UNSUPPORTED_DEVICE
+#endif //VP_VPA_test_unsupported_device
+
+#ifdef VP_VPA_test_unsupported_instance
+namespace VP_VPA_TEST_UNSUPPORTED_INSTANCE {
+    static const VpVariantDesc mergedCapabilities[] = {
+        {
+        "MERGED",
+        static_cast<uint32_t>(std::size(instanceExtensions)), instanceExtensions,
+        0, nullptr,
+        0, nullptr,
+            featureDesc,
+        0, nullptr,
+            propertyDesc,
+        0, nullptr,
+        0, nullptr,
+        0, nullptr,
+        0, nullptr,
+        chainerDesc,
+        },
+    };
+
+    namespace baseline {
+        static const VpVariantDesc variants[] = {
+            {
+                "baseline",
+                static_cast<uint32_t>(std::size(baseline::instanceExtensions)), baseline::instanceExtensions,
+                0, nullptr,
+                0, nullptr,
+                baseline::featureDesc,
+                0, nullptr,
+                baseline::propertyDesc,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                baseline::chainerDesc,
+            },
+        };
+        static const uint32_t variantCount = static_cast<uint32_t>(std::size(variants));
+    } // namespace baseline
+
+    static const VpCapabilitiesDesc capabilities[] = {
+        { baseline::variantCount, baseline::variants },
+    };
+    static const uint32_t capabilityCount = static_cast<uint32_t>(std::size(capabilities));
+} // namespace VP_VPA_TEST_UNSUPPORTED_INSTANCE
+#endif //VP_VPA_test_unsupported_instance
+
+#ifdef VP_VPA_test_variants_device_unsupported
+namespace VP_VPA_TEST_VARIANTS_DEVICE_UNSUPPORTED {
+    namespace supported_a {
+        static const VpVariantDesc variants[] = {
+            {
+                "supported_a",
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                supported_a::featureDesc,
+                0, nullptr,
+                supported_a::propertyDesc,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                supported_a::chainerDesc,
+            },
+        };
+        static const uint32_t variantCount = static_cast<uint32_t>(std::size(variants));
+    } // namespace supported_a
+
+    namespace device_unsupported_a_device_unsupported_b_ {
+        static const VpVariantDesc variants[] = {
+            {
+                "device_unsupported_a",
+                0, nullptr,
+                0, nullptr,
+                static_cast<uint32_t>(std::size(featureStructTypes)), featureStructTypes,
+                device_unsupported_a::featureDesc,
+                0, nullptr,
+                device_unsupported_a::propertyDesc,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                device_unsupported_a::chainerDesc,
+            },
+            {
+                "device_unsupported_b",
+                0, nullptr,
+                static_cast<uint32_t>(std::size(device_unsupported_b::deviceExtensions)), device_unsupported_b::deviceExtensions,
+                0, nullptr,
+                device_unsupported_b::featureDesc,
+                0, nullptr,
+                device_unsupported_b::propertyDesc,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                device_unsupported_b::chainerDesc,
+            },
+        };
+        static const uint32_t variantCount = static_cast<uint32_t>(std::size(variants));
+    } // namespace device_unsupported_a_device_unsupported_b_
+
+    static const VpCapabilitiesDesc capabilities[] = {
+        { supported_a::variantCount, supported_a::variants },
+        { device_unsupported_a_device_unsupported_b_::variantCount, device_unsupported_a_device_unsupported_b_::variants },
+    };
+    static const uint32_t capabilityCount = static_cast<uint32_t>(std::size(capabilities));
+} // namespace VP_VPA_TEST_VARIANTS_DEVICE_UNSUPPORTED
+#endif //VP_VPA_test_variants_device_unsupported
+
+#ifdef VP_VPA_test_variants_instance_unsupported
+namespace VP_VPA_TEST_VARIANTS_INSTANCE_UNSUPPORTED {
+    namespace supported_a {
+        static const VpVariantDesc variants[] = {
+            {
+                "supported_a",
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                supported_a::featureDesc,
+                0, nullptr,
+                supported_a::propertyDesc,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                supported_a::chainerDesc,
+            },
+        };
+        static const uint32_t variantCount = static_cast<uint32_t>(std::size(variants));
+    } // namespace supported_a
+
+    namespace instance_unsupported_a_instance_unsupported_b_ {
+        static const VpVariantDesc variants[] = {
+            {
+                "instance_unsupported_a",
+                static_cast<uint32_t>(std::size(instance_unsupported_a::instanceExtensions)), instance_unsupported_a::instanceExtensions,
+                0, nullptr,
+                0, nullptr,
+                instance_unsupported_a::featureDesc,
+                0, nullptr,
+                instance_unsupported_a::propertyDesc,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                instance_unsupported_a::chainerDesc,
+            },
+            {
+                "instance_unsupported_b",
+                static_cast<uint32_t>(std::size(instance_unsupported_b::instanceExtensions)), instance_unsupported_b::instanceExtensions,
+                0, nullptr,
+                0, nullptr,
+                instance_unsupported_b::featureDesc,
+                0, nullptr,
+                instance_unsupported_b::propertyDesc,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                instance_unsupported_b::chainerDesc,
+            },
+        };
+        static const uint32_t variantCount = static_cast<uint32_t>(std::size(variants));
+    } // namespace instance_unsupported_a_instance_unsupported_b_
+
+    static const VpCapabilitiesDesc capabilities[] = {
+        { supported_a::variantCount, supported_a::variants },
+        { instance_unsupported_a_instance_unsupported_b_::variantCount, instance_unsupported_a_instance_unsupported_b_::variants },
+    };
+    static const uint32_t capabilityCount = static_cast<uint32_t>(std::size(capabilities));
+} // namespace VP_VPA_TEST_VARIANTS_INSTANCE_UNSUPPORTED
+#endif //VP_VPA_test_variants_instance_unsupported
+
+#ifdef VP_VPA_test_variants_supported
+namespace VP_VPA_TEST_VARIANTS_SUPPORTED {
+    namespace supported_a {
+        static const VpVariantDesc variants[] = {
+            {
+                "supported_a",
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                supported_a::featureDesc,
+                0, nullptr,
+                supported_a::propertyDesc,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                supported_a::chainerDesc,
+            },
+        };
+        static const uint32_t variantCount = static_cast<uint32_t>(std::size(variants));
+    } // namespace supported_a
+
+    namespace supported_b_device_unsupported_a_instance_unsupported_a_ {
+        static const VpVariantDesc variants[] = {
+            {
+                "supported_b",
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                supported_b::featureDesc,
+                0, nullptr,
+                supported_b::propertyDesc,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                supported_b::chainerDesc,
+            },
+            {
+                "device_unsupported_a",
+                0, nullptr,
+                0, nullptr,
+                static_cast<uint32_t>(std::size(featureStructTypes)), featureStructTypes,
+                device_unsupported_a::featureDesc,
+                0, nullptr,
+                device_unsupported_a::propertyDesc,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                device_unsupported_a::chainerDesc,
+            },
+            {
+                "instance_unsupported_a",
+                static_cast<uint32_t>(std::size(instance_unsupported_a::instanceExtensions)), instance_unsupported_a::instanceExtensions,
+                0, nullptr,
+                0, nullptr,
+                instance_unsupported_a::featureDesc,
+                0, nullptr,
+                instance_unsupported_a::propertyDesc,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                instance_unsupported_a::chainerDesc,
+            },
+        };
+        static const uint32_t variantCount = static_cast<uint32_t>(std::size(variants));
+    } // namespace supported_b_device_unsupported_a_instance_unsupported_a_
+
+    static const VpCapabilitiesDesc capabilities[] = {
+        { supported_a::variantCount, supported_a::variants },
+        { supported_b_device_unsupported_a_instance_unsupported_a_::variantCount, supported_b_device_unsupported_a_instance_unsupported_a_::variants },
+    };
+    static const uint32_t capabilityCount = static_cast<uint32_t>(std::size(capabilities));
+} // namespace VP_VPA_TEST_VARIANTS_SUPPORTED
+#endif //VP_VPA_test_variants_supported
 
 static const VpProfileDesc profiles[] = {
-#ifdef VP_VULKAN_PROFILES_ASH_custom_profile
+#ifdef VP_VPA_test_fallback
     VpProfileDesc{
-        VpProfileProperties{ VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE_NAME, VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE_SPEC_VERSION },
-        VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE_MIN_API_VERSION,
-        VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE::mergedCapabilities,
+        VpProfileProperties{ VP_VPA_TEST_FALLBACK_NAME, VP_VPA_TEST_FALLBACK_SPEC_VERSION },
+        VP_VPA_TEST_FALLBACK_MIN_API_VERSION,
+        VP_VPA_TEST_FALLBACK::mergedCapabilities,
         0, nullptr,
-        VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE::capabilityCount, VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE::capabilities,
+        VP_VPA_TEST_FALLBACK::capabilityCount, VP_VPA_TEST_FALLBACK::capabilities,
+        VP_VPA_TEST_FALLBACK::fallbackCount, VP_VPA_TEST_FALLBACK::fallbacks,
+    },
+#endif // VP_VPA_TEST_FALLBACK
+#ifdef VP_VPA_test_fallback_fallback
+    VpProfileDesc{
+        VpProfileProperties{ VP_VPA_TEST_FALLBACK_FALLBACK_NAME, VP_VPA_TEST_FALLBACK_FALLBACK_SPEC_VERSION },
+        VP_VPA_TEST_FALLBACK_FALLBACK_MIN_API_VERSION,
+        VP_VPA_TEST_FALLBACK_FALLBACK::mergedCapabilities,
+        0, nullptr,
+        VP_VPA_TEST_FALLBACK_FALLBACK::capabilityCount, VP_VPA_TEST_FALLBACK_FALLBACK::capabilities,
         0, nullptr,
     },
-#endif // VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE
+#endif // VP_VPA_TEST_FALLBACK_FALLBACK
+#ifdef VP_VPA_test_requires
+    VpProfileDesc{
+        VpProfileProperties{ VP_VPA_TEST_REQUIRES_NAME, VP_VPA_TEST_REQUIRES_SPEC_VERSION },
+        VP_VPA_TEST_REQUIRES_MIN_API_VERSION,
+        VP_VPA_TEST_REQUIRES::mergedCapabilities,
+        VP_VPA_TEST_REQUIRES::profileCount, VP_VPA_TEST_REQUIRES::profiles,
+        VP_VPA_TEST_REQUIRES::capabilityCount, VP_VPA_TEST_REQUIRES::capabilities,
+        0, nullptr,
+    },
+#endif // VP_VPA_TEST_REQUIRES
+#ifdef VP_VPA_test_supported
+    VpProfileDesc{
+        VpProfileProperties{ VP_VPA_TEST_SUPPORTED_NAME, VP_VPA_TEST_SUPPORTED_SPEC_VERSION },
+        VP_VPA_TEST_SUPPORTED_MIN_API_VERSION,
+        VP_VPA_TEST_SUPPORTED::mergedCapabilities,
+        0, nullptr,
+        VP_VPA_TEST_SUPPORTED::capabilityCount, VP_VPA_TEST_SUPPORTED::capabilities,
+        0, nullptr,
+    },
+#endif // VP_VPA_TEST_SUPPORTED
+#ifdef VP_VPA_test_unsupported_device
+    VpProfileDesc{
+        VpProfileProperties{ VP_VPA_TEST_UNSUPPORTED_DEVICE_NAME, VP_VPA_TEST_UNSUPPORTED_DEVICE_SPEC_VERSION },
+        VP_VPA_TEST_UNSUPPORTED_DEVICE_MIN_API_VERSION,
+        VP_VPA_TEST_UNSUPPORTED_DEVICE::mergedCapabilities,
+        0, nullptr,
+        VP_VPA_TEST_UNSUPPORTED_DEVICE::capabilityCount, VP_VPA_TEST_UNSUPPORTED_DEVICE::capabilities,
+        0, nullptr,
+    },
+#endif // VP_VPA_TEST_UNSUPPORTED_DEVICE
+#ifdef VP_VPA_test_unsupported_instance
+    VpProfileDesc{
+        VpProfileProperties{ VP_VPA_TEST_UNSUPPORTED_INSTANCE_NAME, VP_VPA_TEST_UNSUPPORTED_INSTANCE_SPEC_VERSION },
+        VP_VPA_TEST_UNSUPPORTED_INSTANCE_MIN_API_VERSION,
+        VP_VPA_TEST_UNSUPPORTED_INSTANCE::mergedCapabilities,
+        0, nullptr,
+        VP_VPA_TEST_UNSUPPORTED_INSTANCE::capabilityCount, VP_VPA_TEST_UNSUPPORTED_INSTANCE::capabilities,
+        0, nullptr,
+    },
+#endif // VP_VPA_TEST_UNSUPPORTED_INSTANCE
+#ifdef VP_VPA_test_variants_device_unsupported
+    VpProfileDesc{
+        VpProfileProperties{ VP_VPA_TEST_VARIANTS_DEVICE_UNSUPPORTED_NAME, VP_VPA_TEST_VARIANTS_DEVICE_UNSUPPORTED_SPEC_VERSION },
+        VP_VPA_TEST_VARIANTS_DEVICE_UNSUPPORTED_MIN_API_VERSION,
+        nullptr,
+        0, nullptr,
+        VP_VPA_TEST_VARIANTS_DEVICE_UNSUPPORTED::capabilityCount, VP_VPA_TEST_VARIANTS_DEVICE_UNSUPPORTED::capabilities,
+        0, nullptr,
+    },
+#endif // VP_VPA_TEST_VARIANTS_DEVICE_UNSUPPORTED
+#ifdef VP_VPA_test_variants_instance_unsupported
+    VpProfileDesc{
+        VpProfileProperties{ VP_VPA_TEST_VARIANTS_INSTANCE_UNSUPPORTED_NAME, VP_VPA_TEST_VARIANTS_INSTANCE_UNSUPPORTED_SPEC_VERSION },
+        VP_VPA_TEST_VARIANTS_INSTANCE_UNSUPPORTED_MIN_API_VERSION,
+        nullptr,
+        0, nullptr,
+        VP_VPA_TEST_VARIANTS_INSTANCE_UNSUPPORTED::capabilityCount, VP_VPA_TEST_VARIANTS_INSTANCE_UNSUPPORTED::capabilities,
+        0, nullptr,
+    },
+#endif // VP_VPA_TEST_VARIANTS_INSTANCE_UNSUPPORTED
+#ifdef VP_VPA_test_variants_supported
+    VpProfileDesc{
+        VpProfileProperties{ VP_VPA_TEST_VARIANTS_SUPPORTED_NAME, VP_VPA_TEST_VARIANTS_SUPPORTED_SPEC_VERSION },
+        VP_VPA_TEST_VARIANTS_SUPPORTED_MIN_API_VERSION,
+        nullptr,
+        0, nullptr,
+        VP_VPA_TEST_VARIANTS_SUPPORTED::capabilityCount, VP_VPA_TEST_VARIANTS_SUPPORTED::capabilities,
+        0, nullptr,
+    },
+#endif // VP_VPA_TEST_VARIANTS_SUPPORTED
 };
 static const uint32_t profileCount = static_cast<uint32_t>(std::size(profiles));
 

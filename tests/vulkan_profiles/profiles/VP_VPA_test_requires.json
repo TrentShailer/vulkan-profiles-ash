@@ -1,0 +1,37 @@
+{
+    "$schema": "https://schema.khronos.org/vulkan/profiles-0.8.2-304.json#",
+    "capabilities": {
+        "baseline": {
+            "features": {
+                "VkPhysicalDeviceShaderFloat16Int8Features": {}
+            }
+        }
+    },
+    "profiles": {
+        "VP_VPA_test_requires": {
+            "version": 1,
+            "api-version": "1.2.0",
+            "label": "Requires Profile",
+            "description": "Profile that requires another profile.",
+            "capabilities": [
+                "baseline"
+            ],
+            "profiles": [
+                "VP_VPA_test_supported"
+            ],
+            "contributors": {
+                "Trent Shailer": {
+                    "company": "N/A"
+                }
+            },
+            "history": [
+                {
+                    "revision": 1,
+                    "date": "2025-01-09",
+                    "author": "Trent Shailer",
+                    "comment": "Initial revision"
+                }
+            ]
+        }
+    }
+}

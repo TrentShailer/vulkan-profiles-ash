@@ -1,0 +1,36 @@
+{
+    "$schema": "https://schema.khronos.org/vulkan/profiles-0.8.2-304.json#",
+    "capabilities": {
+        "baseline": {
+            "features": {
+                "VkPhysicalDeviceShaderFloat16Int8Features": {
+                    "shaderInt8": true
+                }
+            }
+        }
+    },
+    "profiles": {
+        "VP_VPA_test_unsupported_device": {
+            "version": 1,
+            "api-version": "1.2.0",
+            "label": "Unsupported Devive Profile",
+            "description": "Profile that the test device does not support.",
+            "capabilities": [
+                "baseline"
+            ],
+            "contributors": {
+                "Trent Shailer": {
+                    "company": "N/A"
+                }
+            },
+            "history": [
+                {
+                    "revision": 1,
+                    "date": "2025-01-09",
+                    "author": "Trent Shailer",
+                    "comment": "Initial revision"
+                }
+            ]
+        }
+    }
+}

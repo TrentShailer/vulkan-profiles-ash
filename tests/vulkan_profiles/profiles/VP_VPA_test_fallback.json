@@ -1,0 +1,63 @@
+{
+    "$schema": "https://schema.khronos.org/vulkan/profiles-0.8.2-304.json#",
+    "capabilities": {
+        "baseline": {},
+        "advanced": {
+            "features": {
+                "VkPhysicalDeviceShaderFloat16Int8Features": {
+                    "shaderInt8": true
+                }
+            }
+        }
+    },
+    "profiles": {
+        "VP_VPA_test_fallback": {
+            "version": 1,
+            "api-version": "1.2.0",
+            "label": "Fallback Profile",
+            "description": "Profile that has a fallback to another profile.",
+            "capabilities": [
+                "baseline",
+                "advanced"
+            ],
+            "fallback": [
+                "VP_VPA_test_fallback_fallback"
+            ],
+            "contributors": {
+                "Trent Shailer": {
+                    "company": "N/A"
+                }
+            },
+            "history": [
+                {
+                    "revision": 1,
+                    "date": "2025-01-09",
+                    "author": "Trent Shailer",
+                    "comment": "Initial revision"
+                }
+            ]
+        },
+        "VP_VPA_test_fallback_fallback": {
+            "version": 1,
+            "api-version": "1.2.0",
+            "label": "Fallback Fallback Profile",
+            "description": "Profile that the fallback profiles falls back on.",
+            "capabilities": [
+                "baseline"
+            ],
+            "contributors": {
+                "Trent Shailer": {
+                    "company": "N/A"
+                }
+            },
+            "history": [
+                {
+                    "revision": 1,
+                    "date": "2025-01-09",
+                    "author": "Trent Shailer",
+                    "comment": "Initial revision"
+                }
+            ]
+        }
+    }
+}

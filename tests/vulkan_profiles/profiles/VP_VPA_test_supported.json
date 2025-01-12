@@ -1,0 +1,70 @@
+{
+    "$schema": "https://schema.khronos.org/vulkan/profiles-0.8.2-304.json#",
+    "capabilities": {
+        "baseline": {
+            "extensions": {
+                "VK_EXT_debug_utils": 1,
+                "VK_KHR_synchronization2": 1
+            },
+            "features": {
+                "VkPhysicalDeviceFeatures": {
+                    "shaderFloat64": true
+                },
+                "VkPhysicalDeviceShaderFloat16Int8Features": {
+                    "shaderFloat16": true
+                }
+            },
+            "formats": {
+                "VK_FORMAT_R8G8B8A8_UNORM": {
+                    "VkFormatProperties": {
+                        "optimalTilingFeatures": [
+                            "VK_FORMAT_FEATURE_TRANSFER_SRC_BIT"
+                        ],
+                        "bufferFeatures": [
+                            "VK_FORMAT_FEATURE_STORAGE_TEXEL_BUFFER_BIT"
+                        ],
+                        "linearTilingFeatures": [
+                            "VK_FORMAT_FEATURE_TRANSFER_DST_BIT"
+                        ]
+                    }
+                }
+            },
+            "properties": {
+                "VkPhysicalDeviceProperties": {
+                    "limits": {
+                        "maxImageDimension2D": 16384
+                    }
+                },
+                "VkPhysicalDeviceSubgroupProperties": {
+                    "supportedStages": [
+                        "VK_SHADER_STAGE_COMPUTE_BIT"
+                    ]
+                }
+            }
+        }
+    },
+    "profiles": {
+        "VP_VPA_test_supported": {
+            "version": 1,
+            "api-version": "1.2.0",
+            "label": "Supported Profile",
+            "description": "Profile that the test instance and device support.",
+            "capabilities": [
+                "baseline"
+            ],
+            "contributors": {
+                "Trent Shailer": {
+                    "company": "N/A"
+                }
+            },
+            "history": [
+                {
+                    "revision": 1,
+                    "date": "2025-01-09",
+                    "author": "Trent Shailer",
+                    "comment": "Initial revision"
+                }
+            ]
+        }
+    }
+}

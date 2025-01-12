@@ -19,6 +19,12 @@
  * See scripts/gen_profiles_solution.py for modifications.
  */
 
+#pragma once
+
+#define VPAPI_ATTR inline
+
+#include <vulkan/vulkan.h>
+
 #include <cstddef>
 #include <cstdarg>
 #include <cstdio>
@@ -31,7 +37,307 @@
 #include <algorithm>
 #include <memory>
 #include <map>
-#include <vulkan/vulkan_profiles.h>
+
+#if defined(VK_VERSION_1_2)
+#define VP_VPA_examples_compute 1
+#define VP_VPA_EXAMPLES_COMPUTE_NAME "VP_VPA_examples_compute"
+#define VP_VPA_EXAMPLES_COMPUTE_SPEC_VERSION 1
+#define VP_VPA_EXAMPLES_COMPUTE_MIN_API_VERSION VK_MAKE_VERSION(1, 2, 198)
+#endif
+
+#if defined(VK_VERSION_1_0) && \
+    defined(VK_EXT_debug_utils)
+#define VP_VPA_examples_debug 1
+#define VP_VPA_EXAMPLES_DEBUG_NAME "VP_VPA_examples_debug"
+#define VP_VPA_EXAMPLES_DEBUG_SPEC_VERSION 1
+#define VP_VPA_EXAMPLES_DEBUG_MIN_API_VERSION VK_MAKE_VERSION(1, 0, 0)
+#endif
+
+#define VP_HEADER_VERSION_COMPLETE VK_MAKE_API_VERSION(0, 2, 0, VK_HEADER_VERSION)
+
+#define VP_MAX_PROFILE_NAME_SIZE 256U
+
+typedef struct VpProfileProperties {
+    char        profileName[VP_MAX_PROFILE_NAME_SIZE];
+    uint32_t    specVersion;
+} VpProfileProperties;
+
+typedef struct VpBlockProperties {
+    VpProfileProperties profiles;
+    uint32_t apiVersion;
+    char blockName[VP_MAX_PROFILE_NAME_SIZE];
+} VpBlockProperties;
+
+typedef enum VpInstanceCreateFlagBits {
+    VP_INSTANCE_CREATE_FLAG_BITS_MAX_ENUM = 0x7FFFFFFF
+} VpInstanceCreateFlagBits;
+typedef VkFlags VpInstanceCreateFlags;
+
+typedef struct VpInstanceCreateInfo {
+    const VkInstanceCreateInfo* pCreateInfo;
+    VpInstanceCreateFlags       flags;
+    uint32_t                    enabledFullProfileCount;
+    const VpProfileProperties*  pEnabledFullProfiles;
+    uint32_t                    enabledProfileBlockCount;
+    const VpBlockProperties*    pEnabledProfileBlocks;
+} VpInstanceCreateInfo;
+
+typedef enum VpDeviceCreateFlagBits {
+    VP_DEVICE_CREATE_DISABLE_ROBUST_BUFFER_ACCESS_BIT = 0x0000001,
+    VP_DEVICE_CREATE_DISABLE_ROBUST_IMAGE_ACCESS_BIT = 0x0000002,
+    VP_DEVICE_CREATE_DISABLE_ROBUST_ACCESS =
+        VP_DEVICE_CREATE_DISABLE_ROBUST_BUFFER_ACCESS_BIT | VP_DEVICE_CREATE_DISABLE_ROBUST_IMAGE_ACCESS_BIT,
+
+    VP_DEVICE_CREATE_FLAG_BITS_MAX_ENUM = 0x7FFFFFFF
+} VpDeviceCreateFlagBits;
+typedef VkFlags VpDeviceCreateFlags;
+
+typedef struct VpDeviceCreateInfo {
+    const VkDeviceCreateInfo*   pCreateInfo;
+    VpDeviceCreateFlags         flags;
+    uint32_t                    enabledFullProfileCount;
+    const VpProfileProperties*  pEnabledFullProfiles;
+    uint32_t                    enabledProfileBlockCount;
+    const VpBlockProperties*    pEnabledProfileBlocks;
+} VpDeviceCreateInfo;
+
+VK_DEFINE_HANDLE(VpCapabilities)
+
+typedef enum VpCapabilitiesCreateFlagBits {
+    VP_PROFILE_CREATE_STATIC_BIT = (1 << 0),
+    //VP_PROFILE_CREATE_DYNAMIC_BIT = (1 << 1),
+    VP_PROFILE_CREATE_FLAG_BITS_MAX_ENUM = 0x7FFFFFFF
+} VpCapabilitiesCreateFlagBits;
+
+typedef VkFlags VpCapabilitiesCreateFlags;
+
+// Pointers to some Vulkan functions - a subset used by the library.
+// Used in VpCapabilitiesCreateInfo::pVulkanFunctions.
+
+typedef struct VpVulkanFunctions {
+    /// Required when using VP_DYNAMIC_VULKAN_FUNCTIONS.
+    PFN_vkGetInstanceProcAddr GetInstanceProcAddr;
+    /// Required when using VP_DYNAMIC_VULKAN_FUNCTIONS.
+    PFN_vkGetDeviceProcAddr GetDeviceProcAddr;
+    PFN_vkEnumerateInstanceVersion EnumerateInstanceVersion;
+    PFN_vkEnumerateInstanceExtensionProperties EnumerateInstanceExtensionProperties;
+    PFN_vkEnumerateDeviceExtensionProperties EnumerateDeviceExtensionProperties;
+    PFN_vkGetPhysicalDeviceFeatures2 GetPhysicalDeviceFeatures2;
+    PFN_vkGetPhysicalDeviceProperties2 GetPhysicalDeviceProperties2;
+    PFN_vkGetPhysicalDeviceFormatProperties2 GetPhysicalDeviceFormatProperties2;
+    PFN_vkGetPhysicalDeviceQueueFamilyProperties2 GetPhysicalDeviceQueueFamilyProperties2;
+    PFN_vkCreateInstance CreateInstance;
+    PFN_vkCreateDevice CreateDevice;
+} VpVulkanFunctions;
+
+/// Description of a Allocator to be created.
+typedef struct VpCapabilitiesCreateInfo
+{
+    /// Flags for created allocator. Use #VpInstanceCreateFlagBits enum.
+    VpCapabilitiesCreateFlags       flags;
+    uint32_t                        apiVersion;
+    const VpVulkanFunctions*        pVulkanFunctions;
+} VpCapabilitiesCreateInfo;
+
+VPAPI_ATTR VkResult vpCreateCapabilities(
+    const VpCapabilitiesCreateInfo*             pCreateInfo,
+    const VkAllocationCallbacks*                pAllocator,
+    VpCapabilities*                             pCapabilities);
+
+/// Destroys allocator object.
+VPAPI_ATTR void vpDestroyCapabilities(
+    VpCapabilities                              capabilities,
+    const VkAllocationCallbacks*                pAllocator);
+
+// Query the list of available profiles in the library
+VPAPI_ATTR VkResult vpGetProfiles(
+#ifdef VP_USE_OBJECT
+    VpCapabilities                              capabilities,
+#endif//VP_USE_OBJECT
+    uint32_t*                                   pPropertyCount,
+    VpProfileProperties*                        pProperties);
+
+// List the required profiles of a profile
+VPAPI_ATTR VkResult vpGetProfileRequiredProfiles(
+#ifdef VP_USE_OBJECT
+    VpCapabilities                              capabilities,
+#endif//VP_USE_OBJECT
+    const VpProfileProperties*                  pProfile,
+    uint32_t*                                   pPropertyCount,
+    VpProfileProperties*                        pProperties);
+
+// Query the profile required Vulkan API version
+VPAPI_ATTR uint32_t vpGetProfileAPIVersion(
+#ifdef VP_USE_OBJECT
+    VpCapabilities                              capabilities,
+#endif//VP_USE_OBJECT
+    const VpProfileProperties*                  pProfile);
+
+// List the recommended fallback profiles of a profile
+VPAPI_ATTR VkResult vpGetProfileFallbacks(
+#ifdef VP_USE_OBJECT
+    VpCapabilities                              capabilities,
+#endif//VP_USE_OBJECT
+    const VpProfileProperties*                  pProfile,
+    uint32_t*                                   pPropertyCount,
+    VpProfileProperties*                        pProperties);
+
+// Query whether the profile has multiple variants. Profiles with multiple variants can only use vpGetInstanceProfileSupport and vpGetPhysicalDeviceProfileSupport capabilities of the library. Other function will return a VK_ERROR_UNKNOWN error
+VPAPI_ATTR VkResult vpHasMultipleVariantsProfile(
+#ifdef VP_USE_OBJECT
+    VpCapabilities                              capabilities,
+#endif//VP_USE_OBJECT
+    const VpProfileProperties*                  pProfile,
+    VkBool32*                                   pHasMultipleVariants);
+
+// Check whether a profile is supported at the instance level
+VPAPI_ATTR VkResult vpGetInstanceProfileSupport(
+#ifdef VP_USE_OBJECT
+    VpCapabilities                              capabilities,
+#endif//VP_USE_OBJECT
+    const char*                                 pLayerName,
+    const VpProfileProperties*                  pProfile,
+    VkBool32*                                   pSupported);
+
+// Check whether a variant of a profile is supported at the instance level and report this list of blocks used to validate the profiles
+VPAPI_ATTR VkResult vpGetInstanceProfileVariantsSupport(
+#ifdef VP_USE_OBJECT
+    VpCapabilities                              capabilities,
+#endif//VP_USE_OBJECT
+    const char*                                 pLayerName,
+    const VpProfileProperties*                  pProfile,
+    VkBool32*                                   pSupported,
+    uint32_t*                                   pPropertyCount,
+    VpBlockProperties*                          pProperties);
+
+// Create a VkInstance with the profile instance extensions enabled
+VPAPI_ATTR VkResult vpCreateInstance(
+#ifdef VP_USE_OBJECT
+    VpCapabilities                              capabilities,
+#endif//VP_USE_OBJECT
+    const VpInstanceCreateInfo*                 pCreateInfo,
+    const VkAllocationCallbacks*                pAllocator,
+    VkInstance*                                 pInstance);
+
+// Check whether a profile is supported by the physical device
+VPAPI_ATTR VkResult vpGetPhysicalDeviceProfileSupport(
+#ifdef VP_USE_OBJECT
+    VpCapabilities                              capabilities,
+#endif//VP_USE_OBJECT
+    VkInstance                                  instance,
+    VkPhysicalDevice                            physicalDevice,
+    const VpProfileProperties*                  pProfile,
+    VkBool32*                                   pSupported);
+
+// Check whether a variant of a profile is supported by the physical device and report this list of blocks used to validate the profiles
+VPAPI_ATTR VkResult vpGetPhysicalDeviceProfileVariantsSupport(
+#ifdef VP_USE_OBJECT
+    VpCapabilities                              capabilities,
+#endif//VP_USE_OBJECT
+    VkInstance                                  instance,
+    VkPhysicalDevice                            physicalDevice,
+    const VpProfileProperties*                  pProfile,
+    VkBool32*                                   pSupported,
+    uint32_t*                                   pPropertyCount,
+    VpBlockProperties*                          pProperties);
+
+// Create a VkDevice with the profile features and device extensions enabled
+VPAPI_ATTR VkResult vpCreateDevice(
+#ifdef VP_USE_OBJECT
+    VpCapabilities                              capabilities,
+#endif//VP_USE_OBJECT
+    VkPhysicalDevice                            physicalDevice,
+    const VpDeviceCreateInfo*                   pCreateInfo,
+    const VkAllocationCallbacks*                pAllocator,
+    VkDevice*                                   pDevice);
+
+// Query the list of instance extensions of a profile
+VPAPI_ATTR VkResult vpGetProfileInstanceExtensionProperties(
+#ifdef VP_USE_OBJECT
+    VpCapabilities                              capabilities,
+#endif//VP_USE_OBJECT
+    const VpProfileProperties*                  pProfile,
+    const char*                                 pBlockName,
+    uint32_t*                                   pPropertyCount,
+    VkExtensionProperties*                      pProperties);
+
+// Query the list of device extensions of a profile
+VPAPI_ATTR VkResult vpGetProfileDeviceExtensionProperties(
+#ifdef VP_USE_OBJECT
+    VpCapabilities                              capabilities,
+#endif//VP_USE_OBJECT
+    const VpProfileProperties*                  pProfile,
+    const char*                                 pBlockName,
+    uint32_t*                                   pPropertyCount,
+    VkExtensionProperties*                      pProperties);
+
+// Fill the feature structures with the requirements of a profile
+VPAPI_ATTR VkResult vpGetProfileFeatures(
+#ifdef VP_USE_OBJECT
+    VpCapabilities                              capabilities,
+#endif//VP_USE_OBJECT
+    const VpProfileProperties*                  pProfile,
+    const char*                                 pBlockName,
+    void*                                       pNext);
+
+// Query the list of feature structure types specified by the profile
+VPAPI_ATTR VkResult vpGetProfileFeatureStructureTypes(
+#ifdef VP_USE_OBJECT
+    VpCapabilities                              capabilities,
+#endif//VP_USE_OBJECT
+    const VpProfileProperties*                  pProfile,
+    const char*                                 pBlockName,
+    uint32_t*                                   pStructureTypeCount,
+    VkStructureType*                            pStructureTypes);
+
+// Fill the property structures with the requirements of a profile
+VPAPI_ATTR VkResult vpGetProfileProperties(
+#ifdef VP_USE_OBJECT
+    VpCapabilities                              capabilities,
+#endif//VP_USE_OBJECT
+    const VpProfileProperties*                  pProfile,
+    const char*                                 pBlockName,
+    void*                                       pNext);
+
+// Query the list of property structure types specified by the profile
+VPAPI_ATTR VkResult vpGetProfilePropertyStructureTypes(
+#ifdef VP_USE_OBJECT
+    VpCapabilities                              capabilities,
+#endif//VP_USE_OBJECT
+    const VpProfileProperties*                  pProfile,
+    const char*                                 pBlockName,
+    uint32_t*                                   pStructureTypeCount,
+    VkStructureType*                            pStructureTypes);
+
+// Query the list of formats with specified requirements by a profile
+VPAPI_ATTR VkResult vpGetProfileFormats(
+#ifdef VP_USE_OBJECT
+    VpCapabilities                              capabilities,
+#endif//VP_USE_OBJECT
+    const VpProfileProperties*                  pProfile,
+    const char*                                 pBlockName,
+    uint32_t*                                   pFormatCount,
+    VkFormat*                                   pFormats);
+
+// Query the requirements of a format for a profile
+VPAPI_ATTR VkResult vpGetProfileFormatProperties(
+#ifdef VP_USE_OBJECT
+    VpCapabilities                              capabilities,
+#endif//VP_USE_OBJECT
+    const VpProfileProperties*                  pProfile,
+    const char*                                 pBlockName,
+    VkFormat                                    format,
+    void*                                       pNext);
+
+// Query the list of format structure types specified by the profile
+VPAPI_ATTR VkResult vpGetProfileFormatStructureTypes(
+#ifdef VP_USE_OBJECT
+    VpCapabilities                              capabilities,
+#endif//VP_USE_OBJECT
+    const VpProfileProperties*                  pProfile,
+    const char*                                 pBlockName,
+    uint32_t*                                   pStructureTypeCount,
+    VkStructureType*                            pStructureTypes);
 
 namespace detail {
 
@@ -211,23 +517,25 @@ template <typename T>
 VPAPI_ATTR bool vpCheckFlags(const T& actual, const uint64_t expected) {
     return (actual & expected) == expected;
 }
-#ifdef VP_VULKAN_PROFILES_ASH_custom_profile
-namespace VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE {
+#ifdef VP_VPA_examples_compute
+namespace VP_VPA_EXAMPLES_COMPUTE {
 
 static const VkStructureType featureStructTypes[] = {
-    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR,
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES,
 };
 
 static const VkStructureType propertyStructTypes[] = {
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2_KHR,
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_3_PROPERTIES,
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_PROPERTIES,
 };
 
 static const VpFeatureDesc featureDesc = {
     [](VkBaseOutStructure* p) { (void)p;
             switch (p->sType) {
-                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR: {
-                    VkPhysicalDeviceFeatures2KHR* s = static_cast<VkPhysicalDeviceFeatures2KHR*>(static_cast<void*>(p));
-                    s->features.robustBufferAccess = VK_TRUE;
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES: {
+                    VkPhysicalDeviceTimelineSemaphoreFeatures* s = static_cast<VkPhysicalDeviceTimelineSemaphoreFeatures*>(static_cast<void*>(p));
+                    s->timelineSemaphore = VK_TRUE;
                 } break;
                 default: break;
             }
@@ -235,9 +543,9 @@ static const VpFeatureDesc featureDesc = {
     [](VkBaseOutStructure* p) -> bool { (void)p;
         bool ret = true;
             switch (p->sType) {
-                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR: {
-                    VkPhysicalDeviceFeatures2KHR* s = static_cast<VkPhysicalDeviceFeatures2KHR*>(static_cast<void*>(p));
-                    ret = ret && (s->features.robustBufferAccess == VK_TRUE);
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES: {
+                    VkPhysicalDeviceTimelineSemaphoreFeatures* s = static_cast<VkPhysicalDeviceTimelineSemaphoreFeatures*>(static_cast<void*>(p));
+                    ret = ret && (s->timelineSemaphore == VK_TRUE);
                 } break;
                 default: break;
             }
@@ -256,11 +564,14 @@ static const VpPropertyDesc propertyDesc = {
 
 static const VpStructChainerDesc chainerDesc = {
     [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
-        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(nullptr));
+        VkPhysicalDeviceTimelineSemaphoreFeatures physicalDeviceTimelineSemaphoreFeatures{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES, nullptr };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&physicalDeviceTimelineSemaphoreFeatures));
         pfnCb(p, pUser);
     },
     [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
-        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(nullptr));
+        VkPhysicalDeviceMaintenance3Properties physicalDeviceMaintenance3Properties{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_3_PROPERTIES, nullptr };
+        VkPhysicalDeviceSubgroupProperties physicalDeviceSubgroupProperties{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_PROPERTIES, &physicalDeviceMaintenance3Properties };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&physicalDeviceSubgroupProperties));
         pfnCb(p, pUser);
     },
     [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
@@ -271,13 +582,13 @@ static const VpStructChainerDesc chainerDesc = {
     },
 };
 
-namespace custom_profile_requirements {
+namespace baseline {
 static const VpFeatureDesc featureDesc = {
     [](VkBaseOutStructure* p) { (void)p;
             switch (p->sType) {
-                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR: {
-                    VkPhysicalDeviceFeatures2KHR* s = static_cast<VkPhysicalDeviceFeatures2KHR*>(static_cast<void*>(p));
-                    s->features.robustBufferAccess = VK_TRUE;
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES: {
+                    VkPhysicalDeviceTimelineSemaphoreFeatures* s = static_cast<VkPhysicalDeviceTimelineSemaphoreFeatures*>(static_cast<void*>(p));
+                    s->timelineSemaphore = VK_TRUE;
                 } break;
                 default: break;
             }
@@ -285,9 +596,9 @@ static const VpFeatureDesc featureDesc = {
     [](VkBaseOutStructure* p) -> bool { (void)p;
         bool ret = true;
             switch (p->sType) {
-                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR: {
-                    VkPhysicalDeviceFeatures2KHR* s = static_cast<VkPhysicalDeviceFeatures2KHR*>(static_cast<void*>(p));
-                    ret = ret && (s->features.robustBufferAccess == VK_TRUE);
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES: {
+                    VkPhysicalDeviceTimelineSemaphoreFeatures* s = static_cast<VkPhysicalDeviceTimelineSemaphoreFeatures*>(static_cast<void*>(p));
+                    ret = ret && (s->timelineSemaphore == VK_TRUE);
                 } break;
                 default: break;
             }
@@ -300,118 +611,17 @@ static const VpPropertyDesc propertyDesc = {
             switch (p->sType) {
                 case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2_KHR: {
                     VkPhysicalDeviceProperties2KHR* s = static_cast<VkPhysicalDeviceProperties2KHR*>(static_cast<void*>(p));
-                    s->properties.limits.bufferImageGranularity = 131072;
-                    s->properties.limits.discreteQueuePriorities = 2;
-                    s->properties.limits.framebufferColorSampleCounts |= (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT);
-                    s->properties.limits.framebufferDepthSampleCounts |= (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT);
-                    s->properties.limits.framebufferNoAttachmentsSampleCounts |= (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT);
-                    s->properties.limits.framebufferStencilSampleCounts |= (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT);
-                    s->properties.limits.lineWidthGranularity = 1.0f;
-                    s->properties.limits.lineWidthRange[0] = 1.0f;
-                    s->properties.limits.lineWidthRange[1] = 1.0f;
-                    s->properties.limits.maxBoundDescriptorSets = 4;
-                    s->properties.limits.maxClipDistances = 0;
-                    s->properties.limits.maxColorAttachments = 4;
-                    s->properties.limits.maxCombinedClipAndCullDistances = 0;
-                    s->properties.limits.maxComputeSharedMemorySize = 16384;
-                    s->properties.limits.maxComputeWorkGroupCount[0] = 65535;
-                    s->properties.limits.maxComputeWorkGroupCount[1] = 65535;
-                    s->properties.limits.maxComputeWorkGroupCount[2] = 65535;
-                    s->properties.limits.maxComputeWorkGroupInvocations = 128;
-                    s->properties.limits.maxComputeWorkGroupSize[0] = 128;
-                    s->properties.limits.maxComputeWorkGroupSize[1] = 128;
-                    s->properties.limits.maxComputeWorkGroupSize[2] = 64;
-                    s->properties.limits.maxCullDistances = 0;
-                    s->properties.limits.maxDescriptorSetInputAttachments = 4;
-                    s->properties.limits.maxDescriptorSetSampledImages = 96;
-                    s->properties.limits.maxDescriptorSetSamplers = 96;
-                    s->properties.limits.maxDescriptorSetStorageBuffers = 24;
-                    s->properties.limits.maxDescriptorSetStorageBuffersDynamic = 4;
-                    s->properties.limits.maxDescriptorSetStorageImages = 24;
-                    s->properties.limits.maxDescriptorSetUniformBuffers = 72;
-                    s->properties.limits.maxDescriptorSetUniformBuffersDynamic = 8;
-                    s->properties.limits.maxDrawIndexedIndexValue = 16777216;
-                    s->properties.limits.maxDrawIndirectCount = 1;
-                    s->properties.limits.maxFragmentCombinedOutputResources = 4;
-                    s->properties.limits.maxFragmentDualSrcAttachments = 0;
-                    s->properties.limits.maxFragmentInputComponents = 64;
-                    s->properties.limits.maxFragmentOutputAttachments = 4;
-                    s->properties.limits.maxFramebufferHeight = 4096;
-                    s->properties.limits.maxFramebufferLayers = 256;
-                    s->properties.limits.maxFramebufferWidth = 4096;
-                    s->properties.limits.maxGeometryInputComponents = 0;
-                    s->properties.limits.maxGeometryOutputComponents = 0;
-                    s->properties.limits.maxGeometryOutputVertices = 0;
-                    s->properties.limits.maxGeometryShaderInvocations = 0;
-                    s->properties.limits.maxGeometryTotalOutputComponents = 0;
-                    s->properties.limits.maxImageArrayLayers = 256;
-                    s->properties.limits.maxImageDimension1D = 4096;
-                    s->properties.limits.maxImageDimension2D = 4096;
-                    s->properties.limits.maxImageDimension3D = 256;
-                    s->properties.limits.maxImageDimensionCube = 4096;
-                    s->properties.limits.maxInterpolationOffset = 0.0f;
-                    s->properties.limits.maxMemoryAllocationCount = 4096;
-                    s->properties.limits.maxPerStageDescriptorInputAttachments = 4;
-                    s->properties.limits.maxPerStageDescriptorSampledImages = 16;
-                    s->properties.limits.maxPerStageDescriptorSamplers = 16;
-                    s->properties.limits.maxPerStageDescriptorStorageBuffers = 4;
-                    s->properties.limits.maxPerStageDescriptorStorageImages = 4;
-                    s->properties.limits.maxPerStageDescriptorUniformBuffers = 12;
-                    s->properties.limits.maxPerStageResources = 128;
-                    s->properties.limits.maxPushConstantsSize = 128;
-                    s->properties.limits.maxSampleMaskWords = 1;
-                    s->properties.limits.maxSamplerAllocationCount = 4000;
-                    s->properties.limits.maxSamplerAnisotropy = 1;
-                    s->properties.limits.maxSamplerLodBias = 2;
-                    s->properties.limits.maxStorageBufferRange = 134217728;
-                    s->properties.limits.maxTessellationControlPerPatchOutputComponents = 0;
-                    s->properties.limits.maxTessellationControlPerVertexInputComponents = 0;
-                    s->properties.limits.maxTessellationControlPerVertexOutputComponents = 0;
-                    s->properties.limits.maxTessellationControlTotalOutputComponents = 0;
-                    s->properties.limits.maxTessellationEvaluationInputComponents = 0;
-                    s->properties.limits.maxTessellationEvaluationOutputComponents = 0;
-                    s->properties.limits.maxTessellationGenerationLevel = 0;
-                    s->properties.limits.maxTessellationPatchSize = 0;
-                    s->properties.limits.maxTexelBufferElements = 65536;
-                    s->properties.limits.maxTexelGatherOffset = 7;
-                    s->properties.limits.maxTexelOffset = 7;
-                    s->properties.limits.maxUniformBufferRange = 16384;
-                    s->properties.limits.maxVertexInputAttributeOffset = 2047;
-                    s->properties.limits.maxVertexInputAttributes = 16;
-                    s->properties.limits.maxVertexInputBindingStride = 2048;
-                    s->properties.limits.maxVertexInputBindings = 16;
-                    s->properties.limits.maxVertexOutputComponents = 64;
-                    s->properties.limits.maxViewportDimensions[0] = 4096;
-                    s->properties.limits.maxViewportDimensions[1] = 4096;
-                    s->properties.limits.maxViewports = 1;
-                    s->properties.limits.minInterpolationOffset = 0.0f;
-                    s->properties.limits.minMemoryMapAlignment = 64;
-                    s->properties.limits.minStorageBufferOffsetAlignment = 256;
-                    s->properties.limits.minTexelBufferOffsetAlignment = 256;
-                    s->properties.limits.minTexelGatherOffset = -8;
-                    s->properties.limits.minTexelOffset = -8;
-                    s->properties.limits.minUniformBufferOffsetAlignment = 256;
-                    s->properties.limits.mipmapPrecisionBits = 4;
-                    s->properties.limits.nonCoherentAtomSize = 256;
-                    s->properties.limits.pointSizeGranularity = 1.0f;
-                    s->properties.limits.pointSizeRange[0] = 1.0f;
-                    s->properties.limits.pointSizeRange[1] = 1.0f;
-                    s->properties.limits.sampledImageColorSampleCounts |= (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT);
-                    s->properties.limits.sampledImageDepthSampleCounts |= (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT);
-                    s->properties.limits.sampledImageIntegerSampleCounts |= (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT);
-                    s->properties.limits.sampledImageStencilSampleCounts |= (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT);
-                    s->properties.limits.sparseAddressSpaceSize = 0;
-                    s->properties.limits.storageImageSampleCounts |= (VK_SAMPLE_COUNT_1_BIT);
-                    s->properties.limits.subPixelInterpolationOffsetBits = 0;
-                    s->properties.limits.subPixelPrecisionBits = 4;
-                    s->properties.limits.subTexelPrecisionBits = 4;
-                    s->properties.limits.viewportBoundsRange[0] = -8192;
-                    s->properties.limits.viewportBoundsRange[1] = 8192;
-                    s->properties.limits.viewportSubPixelBits = 0;
-                    s->properties.sparseProperties.residencyNonResidentStrict = VK_FALSE;
-                    s->properties.sparseProperties.residencyStandard2DBlockShape = VK_FALSE;
-                    s->properties.sparseProperties.residencyStandard2DMultisampleBlockShape = VK_FALSE;
-                    s->properties.sparseProperties.residencyStandard3DBlockShape = VK_FALSE;
+                    s->properties.limits.maxStorageBufferRange = 142606336;
+                } break;
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_3_PROPERTIES: {
+                    VkPhysicalDeviceMaintenance3Properties* s = static_cast<VkPhysicalDeviceMaintenance3Properties*>(static_cast<void*>(p));
+                    s->maxMemoryAllocationSize = 142606336;
+                } break;
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_PROPERTIES: {
+                    VkPhysicalDeviceSubgroupProperties* s = static_cast<VkPhysicalDeviceSubgroupProperties*>(static_cast<void*>(p));
+                    s->subgroupSize = 4;
+                    s->supportedOperations |= (VK_SUBGROUP_FEATURE_BALLOT_BIT | VK_SUBGROUP_FEATURE_ARITHMETIC_BIT);
+                    s->supportedStages |= (VK_SHADER_STAGE_COMPUTE_BIT);
                 } break;
                 default: break;
             }
@@ -421,126 +631,18 @@ static const VpPropertyDesc propertyDesc = {
             switch (p->sType) {
                 case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2_KHR: {
                     VkPhysicalDeviceProperties2KHR* s = static_cast<VkPhysicalDeviceProperties2KHR*>(static_cast<void*>(p));
-                    ret = ret && (s->properties.limits.bufferImageGranularity <= 131072);
-                    ret = ret && ((131072 % s->properties.limits.bufferImageGranularity) == 0);
-                    ret = ret && (s->properties.limits.discreteQueuePriorities >= 2);
-                    ret = ret && (vpCheckFlags(s->properties.limits.framebufferColorSampleCounts, (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT)));
-                    ret = ret && (vpCheckFlags(s->properties.limits.framebufferDepthSampleCounts, (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT)));
-                    ret = ret && (vpCheckFlags(s->properties.limits.framebufferNoAttachmentsSampleCounts, (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT)));
-                    ret = ret && (vpCheckFlags(s->properties.limits.framebufferStencilSampleCounts, (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT)));
-                    ret = ret && (s->properties.limits.lineWidthGranularity <= 1.0);
-                    ret = ret && (isMultiple(1.0, s->properties.limits.lineWidthGranularity));
-                    ret = ret && (s->properties.limits.lineWidthRange[0] <= 1.0);
-                    ret = ret && (s->properties.limits.lineWidthRange[1] >= 1.0);
-                    ret = ret && (s->properties.limits.maxBoundDescriptorSets >= 4);
-                    ret = ret && (s->properties.limits.maxClipDistances >= 0);
-                    ret = ret && (s->properties.limits.maxColorAttachments >= 4);
-                    ret = ret && (s->properties.limits.maxCombinedClipAndCullDistances >= 0);
-                    ret = ret && (s->properties.limits.maxComputeSharedMemorySize >= 16384);
-                    ret = ret && (s->properties.limits.maxComputeWorkGroupCount[0] >= 65535);
-                    ret = ret && (s->properties.limits.maxComputeWorkGroupCount[1] >= 65535);
-                    ret = ret && (s->properties.limits.maxComputeWorkGroupCount[2] >= 65535);
-                    ret = ret && (s->properties.limits.maxComputeWorkGroupInvocations >= 128);
-                    ret = ret && (s->properties.limits.maxComputeWorkGroupSize[0] >= 128);
-                    ret = ret && (s->properties.limits.maxComputeWorkGroupSize[1] >= 128);
-                    ret = ret && (s->properties.limits.maxComputeWorkGroupSize[2] >= 64);
-                    ret = ret && (s->properties.limits.maxCullDistances >= 0);
-                    ret = ret && (s->properties.limits.maxDescriptorSetInputAttachments >= 4);
-                    ret = ret && (s->properties.limits.maxDescriptorSetSampledImages >= 96);
-                    ret = ret && (s->properties.limits.maxDescriptorSetSamplers >= 96);
-                    ret = ret && (s->properties.limits.maxDescriptorSetStorageBuffers >= 24);
-                    ret = ret && (s->properties.limits.maxDescriptorSetStorageBuffersDynamic >= 4);
-                    ret = ret && (s->properties.limits.maxDescriptorSetStorageImages >= 24);
-                    ret = ret && (s->properties.limits.maxDescriptorSetUniformBuffers >= 72);
-                    ret = ret && (s->properties.limits.maxDescriptorSetUniformBuffersDynamic >= 8);
-                    ret = ret && (s->properties.limits.maxDrawIndexedIndexValue >= 16777216);
-                    ret = ret && (s->properties.limits.maxDrawIndirectCount >= 1);
-                    ret = ret && (s->properties.limits.maxFragmentCombinedOutputResources >= 4);
-                    ret = ret && (s->properties.limits.maxFragmentDualSrcAttachments >= 0);
-                    ret = ret && (s->properties.limits.maxFragmentInputComponents >= 64);
-                    ret = ret && (s->properties.limits.maxFragmentOutputAttachments >= 4);
-                    ret = ret && (s->properties.limits.maxFramebufferHeight >= 4096);
-                    ret = ret && (s->properties.limits.maxFramebufferLayers >= 256);
-                    ret = ret && (s->properties.limits.maxFramebufferWidth >= 4096);
-                    ret = ret && (s->properties.limits.maxGeometryInputComponents >= 0);
-                    ret = ret && (s->properties.limits.maxGeometryOutputComponents >= 0);
-                    ret = ret && (s->properties.limits.maxGeometryOutputVertices >= 0);
-                    ret = ret && (s->properties.limits.maxGeometryShaderInvocations >= 0);
-                    ret = ret && (s->properties.limits.maxGeometryTotalOutputComponents >= 0);
-                    ret = ret && (s->properties.limits.maxImageArrayLayers >= 256);
-                    ret = ret && (s->properties.limits.maxImageDimension1D >= 4096);
-                    ret = ret && (s->properties.limits.maxImageDimension2D >= 4096);
-                    ret = ret && (s->properties.limits.maxImageDimension3D >= 256);
-                    ret = ret && (s->properties.limits.maxImageDimensionCube >= 4096);
-                    ret = ret && (s->properties.limits.maxInterpolationOffset >= 0.0);
-                    ret = ret && (s->properties.limits.maxMemoryAllocationCount >= 4096);
-                    ret = ret && (s->properties.limits.maxPerStageDescriptorInputAttachments >= 4);
-                    ret = ret && (s->properties.limits.maxPerStageDescriptorSampledImages >= 16);
-                    ret = ret && (s->properties.limits.maxPerStageDescriptorSamplers >= 16);
-                    ret = ret && (s->properties.limits.maxPerStageDescriptorStorageBuffers >= 4);
-                    ret = ret && (s->properties.limits.maxPerStageDescriptorStorageImages >= 4);
-                    ret = ret && (s->properties.limits.maxPerStageDescriptorUniformBuffers >= 12);
-                    ret = ret && (s->properties.limits.maxPerStageResources >= 128);
-                    ret = ret && (s->properties.limits.maxPushConstantsSize >= 128);
-                    ret = ret && (s->properties.limits.maxSampleMaskWords >= 1);
-                    ret = ret && (s->properties.limits.maxSamplerAllocationCount >= 4000);
-                    ret = ret && (s->properties.limits.maxSamplerAnisotropy >= 1);
-                    ret = ret && (s->properties.limits.maxSamplerLodBias >= 2);
-                    ret = ret && (s->properties.limits.maxStorageBufferRange >= 134217728);
-                    ret = ret && (s->properties.limits.maxTessellationControlPerPatchOutputComponents >= 0);
-                    ret = ret && (s->properties.limits.maxTessellationControlPerVertexInputComponents >= 0);
-                    ret = ret && (s->properties.limits.maxTessellationControlPerVertexOutputComponents >= 0);
-                    ret = ret && (s->properties.limits.maxTessellationControlTotalOutputComponents >= 0);
-                    ret = ret && (s->properties.limits.maxTessellationEvaluationInputComponents >= 0);
-                    ret = ret && (s->properties.limits.maxTessellationEvaluationOutputComponents >= 0);
-                    ret = ret && (s->properties.limits.maxTessellationGenerationLevel >= 0);
-                    ret = ret && (s->properties.limits.maxTessellationPatchSize >= 0);
-                    ret = ret && (s->properties.limits.maxTexelBufferElements >= 65536);
-                    ret = ret && (s->properties.limits.maxTexelGatherOffset >= 7);
-                    ret = ret && (s->properties.limits.maxTexelOffset >= 7);
-                    ret = ret && (s->properties.limits.maxUniformBufferRange >= 16384);
-                    ret = ret && (s->properties.limits.maxVertexInputAttributeOffset >= 2047);
-                    ret = ret && (s->properties.limits.maxVertexInputAttributes >= 16);
-                    ret = ret && (s->properties.limits.maxVertexInputBindingStride >= 2048);
-                    ret = ret && (s->properties.limits.maxVertexInputBindings >= 16);
-                    ret = ret && (s->properties.limits.maxVertexOutputComponents >= 64);
-                    ret = ret && (s->properties.limits.maxViewportDimensions[0] >= 4096);
-                    ret = ret && (s->properties.limits.maxViewportDimensions[1] >= 4096);
-                    ret = ret && (s->properties.limits.maxViewports >= 1);
-                    ret = ret && (s->properties.limits.minInterpolationOffset <= 0.0);
-                    ret = ret && (s->properties.limits.minMemoryMapAlignment <= 64);
-                    ret = ret && ((s->properties.limits.minMemoryMapAlignment & (s->properties.limits.minMemoryMapAlignment - 1)) == 0);
-                    ret = ret && (s->properties.limits.minStorageBufferOffsetAlignment <= 256);
-                    ret = ret && ((s->properties.limits.minStorageBufferOffsetAlignment & (s->properties.limits.minStorageBufferOffsetAlignment - 1)) == 0);
-                    ret = ret && (s->properties.limits.minTexelBufferOffsetAlignment <= 256);
-                    ret = ret && ((s->properties.limits.minTexelBufferOffsetAlignment & (s->properties.limits.minTexelBufferOffsetAlignment - 1)) == 0);
-                    ret = ret && (s->properties.limits.minTexelGatherOffset <= -8);
-                    ret = ret && (s->properties.limits.minTexelOffset <= -8);
-                    ret = ret && (s->properties.limits.minUniformBufferOffsetAlignment <= 256);
-                    ret = ret && ((s->properties.limits.minUniformBufferOffsetAlignment & (s->properties.limits.minUniformBufferOffsetAlignment - 1)) == 0);
-                    ret = ret && (s->properties.limits.mipmapPrecisionBits >= 4);
-                    ret = ret && (s->properties.limits.nonCoherentAtomSize <= 256);
-                    ret = ret && ((s->properties.limits.nonCoherentAtomSize & (s->properties.limits.nonCoherentAtomSize - 1)) == 0);
-                    ret = ret && (s->properties.limits.pointSizeGranularity <= 1.0);
-                    ret = ret && (isMultiple(1.0, s->properties.limits.pointSizeGranularity));
-                    ret = ret && (s->properties.limits.pointSizeRange[0] <= 1.0);
-                    ret = ret && (s->properties.limits.pointSizeRange[1] >= 1.0);
-                    ret = ret && (vpCheckFlags(s->properties.limits.sampledImageColorSampleCounts, (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT)));
-                    ret = ret && (vpCheckFlags(s->properties.limits.sampledImageDepthSampleCounts, (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT)));
-                    ret = ret && (vpCheckFlags(s->properties.limits.sampledImageIntegerSampleCounts, (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT)));
-                    ret = ret && (vpCheckFlags(s->properties.limits.sampledImageStencilSampleCounts, (VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT)));
-                    ret = ret && (s->properties.limits.sparseAddressSpaceSize >= 0);
-                    ret = ret && (vpCheckFlags(s->properties.limits.storageImageSampleCounts, (VK_SAMPLE_COUNT_1_BIT)));
-                    ret = ret && (s->properties.limits.subPixelInterpolationOffsetBits >= 0);
-                    ret = ret && (s->properties.limits.subPixelPrecisionBits >= 4);
-                    ret = ret && (s->properties.limits.subTexelPrecisionBits >= 4);
-                    ret = ret && (s->properties.limits.viewportBoundsRange[0] <= -8192);
-                    ret = ret && (s->properties.limits.viewportBoundsRange[1] >= 8192);
-                    ret = ret && (s->properties.limits.viewportSubPixelBits >= 0);
-                    ret = ret && (vpCheckFlags(s->properties.sparseProperties.residencyNonResidentStrict, VK_FALSE));
-                    ret = ret && (vpCheckFlags(s->properties.sparseProperties.residencyStandard2DBlockShape, VK_FALSE));
-                    ret = ret && (vpCheckFlags(s->properties.sparseProperties.residencyStandard2DMultisampleBlockShape, VK_FALSE));
-                    ret = ret && (vpCheckFlags(s->properties.sparseProperties.residencyStandard3DBlockShape, VK_FALSE));
+                    ret = ret && (s->properties.limits.maxStorageBufferRange >= 142606336);
+                } break;
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_3_PROPERTIES: {
+                    VkPhysicalDeviceMaintenance3Properties* s = static_cast<VkPhysicalDeviceMaintenance3Properties*>(static_cast<void*>(p));
+                    ret = ret && (s->maxMemoryAllocationSize >= 142606336);
+                } break;
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_PROPERTIES: {
+                    VkPhysicalDeviceSubgroupProperties* s = static_cast<VkPhysicalDeviceSubgroupProperties*>(static_cast<void*>(p));
+                    ret = ret && (s->subgroupSize >= 4);
+                    ret = ret && ((s->subgroupSize & (s->subgroupSize - 1)) == 0);
+                    ret = ret && (vpCheckFlags(s->supportedOperations, (VK_SUBGROUP_FEATURE_BALLOT_BIT | VK_SUBGROUP_FEATURE_ARITHMETIC_BIT)));
+                    ret = ret && (vpCheckFlags(s->supportedStages, (VK_SHADER_STAGE_COMPUTE_BIT)));
                 } break;
                 default: break;
             }
@@ -550,11 +652,14 @@ static const VpPropertyDesc propertyDesc = {
 
 static const VpStructChainerDesc chainerDesc = {
     [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
-        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(nullptr));
+        VkPhysicalDeviceTimelineSemaphoreFeatures physicalDeviceTimelineSemaphoreFeatures{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES, nullptr };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&physicalDeviceTimelineSemaphoreFeatures));
         pfnCb(p, pUser);
     },
     [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
-        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(nullptr));
+        VkPhysicalDeviceMaintenance3Properties physicalDeviceMaintenance3Properties{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_3_PROPERTIES, nullptr };
+        VkPhysicalDeviceSubgroupProperties physicalDeviceSubgroupProperties{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_PROPERTIES, &physicalDeviceMaintenance3Properties };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&physicalDeviceSubgroupProperties));
         pfnCb(p, pUser);
     },
     [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
@@ -564,13 +669,94 @@ static const VpStructChainerDesc chainerDesc = {
         pfnCb(p, pUser);
     },
 };
-} //namespace custom_profile_requirements
-} // namespace VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE
-#endif // VP_VULKAN_PROFILES_ASH_custom_profile
+} //namespace baseline
+} // namespace VP_VPA_EXAMPLES_COMPUTE
+#endif // VP_VPA_examples_compute
+
+#ifdef VP_VPA_examples_debug
+namespace VP_VPA_EXAMPLES_DEBUG {
+
+static const VkExtensionProperties instanceExtensions[] = {
+    VkExtensionProperties{ VK_EXT_DEBUG_UTILS_EXTENSION_NAME, 1 },
+};
+
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+};
+
+namespace debug {
+static const VkExtensionProperties instanceExtensions[] = {
+    VkExtensionProperties{ VK_EXT_DEBUG_UTILS_EXTENSION_NAME, 1 },
+};
+
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+};
+} //namespace debug
+} // namespace VP_VPA_EXAMPLES_DEBUG
+#endif // VP_VPA_examples_debug
 
 
-#ifdef VP_VULKAN_PROFILES_ASH_custom_profile
-namespace VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE {
+#ifdef VP_VPA_examples_compute
+namespace VP_VPA_EXAMPLES_COMPUTE {
     static const VpVariantDesc mergedCapabilities[] = {
         {
         "MERGED",
@@ -588,44 +774,100 @@ namespace VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE {
         },
     };
 
-    namespace custom_profile_requirements {
+    namespace baseline {
         static const VpVariantDesc variants[] = {
             {
-                "custom_profile_requirements",
+                "baseline",
                 0, nullptr,
                 0, nullptr,
                 static_cast<uint32_t>(std::size(featureStructTypes)), featureStructTypes,
-                custom_profile_requirements::featureDesc,
+                baseline::featureDesc,
                 static_cast<uint32_t>(std::size(propertyStructTypes)), propertyStructTypes,
-                custom_profile_requirements::propertyDesc,
+                baseline::propertyDesc,
                 0, nullptr,
                 0, nullptr,
                 0, nullptr,
                 0, nullptr,
-                custom_profile_requirements::chainerDesc,
+                baseline::chainerDesc,
             },
         };
         static const uint32_t variantCount = static_cast<uint32_t>(std::size(variants));
-    } // namespace custom_profile_requirements
+    } // namespace baseline
 
     static const VpCapabilitiesDesc capabilities[] = {
-        { custom_profile_requirements::variantCount, custom_profile_requirements::variants },
+        { baseline::variantCount, baseline::variants },
     };
     static const uint32_t capabilityCount = static_cast<uint32_t>(std::size(capabilities));
-} // namespace VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE
-#endif //VP_VULKAN_PROFILES_ASH_custom_profile
+} // namespace VP_VPA_EXAMPLES_COMPUTE
+#endif //VP_VPA_examples_compute
+
+#ifdef VP_VPA_examples_debug
+namespace VP_VPA_EXAMPLES_DEBUG {
+    static const VpVariantDesc mergedCapabilities[] = {
+        {
+        "MERGED",
+        static_cast<uint32_t>(std::size(instanceExtensions)), instanceExtensions,
+        0, nullptr,
+        0, nullptr,
+            featureDesc,
+        0, nullptr,
+            propertyDesc,
+        0, nullptr,
+        0, nullptr,
+        0, nullptr,
+        0, nullptr,
+        chainerDesc,
+        },
+    };
+
+    namespace debug {
+        static const VpVariantDesc variants[] = {
+            {
+                "debug",
+                static_cast<uint32_t>(std::size(debug::instanceExtensions)), debug::instanceExtensions,
+                0, nullptr,
+                0, nullptr,
+                debug::featureDesc,
+                0, nullptr,
+                debug::propertyDesc,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                0, nullptr,
+                debug::chainerDesc,
+            },
+        };
+        static const uint32_t variantCount = static_cast<uint32_t>(std::size(variants));
+    } // namespace debug
+
+    static const VpCapabilitiesDesc capabilities[] = {
+        { debug::variantCount, debug::variants },
+    };
+    static const uint32_t capabilityCount = static_cast<uint32_t>(std::size(capabilities));
+} // namespace VP_VPA_EXAMPLES_DEBUG
+#endif //VP_VPA_examples_debug
 
 static const VpProfileDesc profiles[] = {
-#ifdef VP_VULKAN_PROFILES_ASH_custom_profile
+#ifdef VP_VPA_examples_compute
     VpProfileDesc{
-        VpProfileProperties{ VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE_NAME, VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE_SPEC_VERSION },
-        VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE_MIN_API_VERSION,
-        VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE::mergedCapabilities,
+        VpProfileProperties{ VP_VPA_EXAMPLES_COMPUTE_NAME, VP_VPA_EXAMPLES_COMPUTE_SPEC_VERSION },
+        VP_VPA_EXAMPLES_COMPUTE_MIN_API_VERSION,
+        VP_VPA_EXAMPLES_COMPUTE::mergedCapabilities,
         0, nullptr,
-        VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE::capabilityCount, VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE::capabilities,
+        VP_VPA_EXAMPLES_COMPUTE::capabilityCount, VP_VPA_EXAMPLES_COMPUTE::capabilities,
         0, nullptr,
     },
-#endif // VP_VULKAN_PROFILES_ASH_CUSTOM_PROFILE
+#endif // VP_VPA_EXAMPLES_COMPUTE
+#ifdef VP_VPA_examples_debug
+    VpProfileDesc{
+        VpProfileProperties{ VP_VPA_EXAMPLES_DEBUG_NAME, VP_VPA_EXAMPLES_DEBUG_SPEC_VERSION },
+        VP_VPA_EXAMPLES_DEBUG_MIN_API_VERSION,
+        VP_VPA_EXAMPLES_DEBUG::mergedCapabilities,
+        0, nullptr,
+        VP_VPA_EXAMPLES_DEBUG::capabilityCount, VP_VPA_EXAMPLES_DEBUG::capabilities,
+        0, nullptr,
+    },
+#endif // VP_VPA_EXAMPLES_DEBUG
 };
 static const uint32_t profileCount = static_cast<uint32_t>(std::size(profiles));
 

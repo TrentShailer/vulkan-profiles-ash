@@ -2,7 +2,7 @@ use ash::vk;
 
 use crate::{
     utils::debug_flags,
-    vp::{DeviceCreateFlags, InstanceCreateFlags},
+    vp::{CapabilitiesCreateFlags, DeviceCreateFlags, InstanceCreateFlags},
 };
 
 impl core::fmt::Debug for InstanceCreateFlags {
@@ -28,6 +28,13 @@ impl core::fmt::Debug for DeviceCreateFlags {
                 "DISABLE_ROBUST_IMAGE_ACCESS",
             ),
         ];
+        debug_flags(f, KNOWN, self.0)
+    }
+}
+
+impl core::fmt::Debug for CapabilitiesCreateFlags {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        const KNOWN: &[(vk::Flags, &str)] = &[(CapabilitiesCreateFlags::STATIC.0, "STATIC")];
         debug_flags(f, KNOWN, self.0)
     }
 }
