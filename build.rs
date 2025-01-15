@@ -36,6 +36,39 @@ fn main() {
         .include(&vulkan_include_dir)
         .define("VP_USE_OBJECT", "1");
 
+    #[cfg(feature = "VK_USE_PLATFORM_ANDROID_KHR")]
+    build.define("VK_USE_PLATFORM_ANDROID_KHR", "1");
+    #[cfg(feature = "VK_USE_PLATFORM_FUCHSIA")]
+    build.define("VK_USE_PLATFORM_FUCHSIA", "1");
+    #[cfg(feature = "VK_USE_PLATFORM_IOS_MVK")]
+    build.define("VK_USE_PLATFORM_IOS_MVK", "1");
+    #[cfg(feature = "VK_USE_PLATFORM_MACOS_MVK")]
+    build.define("VK_USE_PLATFORM_MACOS_MVK", "1");
+    #[cfg(feature = "VK_USE_PLATFORM_METAL_EXT")]
+    build.define("VK_USE_PLATFORM_METAL_EXT", "1");
+    #[cfg(feature = "VK_USE_PLATFORM_VI_NN")]
+    build.define("VK_USE_PLATFORM_VI_NN", "1");
+    #[cfg(feature = "VK_USE_PLATFORM_WAYLAND_KHR")]
+    build.define("VK_USE_PLATFORM_WAYLAND_KHR", "1");
+    #[cfg(feature = "VK_USE_PLATFORM_WIN32_KHR")]
+    build.define("VK_USE_PLATFORM_WIN32_KHR", "1");
+    #[cfg(feature = "VK_USE_PLATFORM_XCB_KHR")]
+    build.define("VK_USE_PLATFORM_XCB_KHR", "1");
+    #[cfg(feature = "VK_USE_PLATFORM_XLIB_KHR")]
+    build.define("VK_USE_PLATFORM_XLIB_KHR", "1");
+    #[cfg(feature = "VK_USE_PLATFORM_DIRECTFB_EXT")]
+    build.define("VK_USE_PLATFORM_DIRECTFB_EXT", "1");
+    #[cfg(feature = "VK_USE_PLATFORM_XLIB_XRANDR_EXT")]
+    build.define("VK_USE_PLATFORM_XLIB_XRANDR_EXT", "1");
+    #[cfg(feature = "VK_USE_PLATFORM_GGP")]
+    build.define("VK_USE_PLATFORM_GGP", "1");
+    #[cfg(feature = "VK_USE_PLATFORM_SCREEN_QNX")]
+    build.define("VK_USE_PLATFORM_SCREEN_QNX", "1");
+    #[cfg(feature = "VK_USE_PLATFORM_SCI")]
+    build.define("VK_USE_PLATFORM_SCI", "1");
+    #[cfg(feature = "VK_ENABLE_BETA_EXTENSIONS")]
+    build.define("VK_ENABLE_BETA_EXTENSIONS", "1");
+
     // Compile the library.
     build.compile("vulkan_profiles_ash");
 
