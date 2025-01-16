@@ -17,14 +17,14 @@ const BUFFER_VALUES: u32 = 2u32.pow(26);
 const COMMAND_BUFFER_COUNT: u32 = 3;
 
 fn n_dispatches(n_values_input: u32, subgroup_size: u32) -> u32 {
-    let values_processed_per_dispatch = 64 * subgroup_size;
+    let values_processed_per_dispatch = 128 * subgroup_size;
 
     n_values_input.div_ceil(values_processed_per_dispatch)
 }
 
 fn n_values_output(n_values_input: u32, subgroup_size: u32) -> u32 {
-    let subgroups_per_dispatch = 64 / subgroup_size; // 16
-    let values_processed_per_dispatch = 64 * subgroup_size; // 1024
+    let subgroups_per_dispatch = 128 / subgroup_size; // 16
+    let values_processed_per_dispatch = 128 * subgroup_size; // 1024
     let values_produced_per_dispatch = subgroups_per_dispatch; // 16
 
     let number_of_dispatches = n_values_input as f64 / values_processed_per_dispatch as f64;

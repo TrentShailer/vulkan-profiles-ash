@@ -5,45 +5,61 @@ struct BufferSet
     StructuredBuffer<int> read_buffer;
     RWStructuredBuffer<int> write_buffer;
 }
-[[vk::binding(0, 0)]]
-ParameterBlock<BufferSet> buffers;
 
 struct PushConstants
 {
     uint input_length;
 }
+
+[[vk::binding(0, 0)]]
+ParameterBlock<BufferSet> buffers;
+
 [vk::push_constant]
-ConstantBuffer<PushConstants> push_constants; // std140 alignment
+ConstantBuffer<PushConstants> push_constants;
 
 static const int OUT_OF_BOUNDS = int.minValue;
 
-[shader("compute")]
-[numthreads(64, 1, 1)]
-void main(
-    uint3 global_id: SV_DispatchThreadID, // 0 - (WORKGROUP_SIZE * dispatch_x)
-    uint3 group_id: SV_GroupID,           // 0 - dispatch_x
-    uint3 thread_id: SV_GroupThreadID,    // 0 - WORKGROUP_SIZE
-)
+// The amount each thread increments their read index by every iteration
+uint iteration_stride()
 {
-    let input_length = push_constants.input_length;
+    return WaveGetLaneCount();
+}
+
+// The starting index in the buffer for this thread
+uint thread_start(uint global_index)
+{
+    let lane_count = WaveGetLaneCount();
+    let values_per_warp = lane_count * lane_count;
+
+    let global_warp_index = global_index / lane_count;
+    let global_warp_start = global_warp_index * values_per_warp;
+
+    return global_warp_start + WaveGetLaneIndex();
+}
+
+[shader("compute")]
+[numthreads(128, 1, 1)]
+void main(
+    uint3 global_id: SV_DispatchThreadID,
+    uint3 group_id: SV_GroupID,
+    uint3 thread_id: SV_GroupThreadID, )
+{
     let lane_count = WaveGetLaneCount();
 
-    // The number of values that is processed by each thread.
-    let thread_values = lane_count;
+    let input_length = push_constants.input_length;
 
-    // The starting index in the buffer for this global thread id.
-    let index = global_id.x * thread_values;
+    let stride = iteration_stride();
+    let index = thread_start(global_id.x);
 
     var thread_maximum = OUT_OF_BOUNDS;
 
     for (uint i = 0; i < lane_count; i++)
     {
-        uint read_index = index + i;
+        uint read_index = index + i * stride;
 
         // Handle out of bounds using most negative value.
         let fetch_value = read_index < input_length ? buffers.read_buffer[read_index] : OUT_OF_BOUNDS;
 
-        // Note that this \/ causes a stall on global memory load from /\ ~90% of samples are on this load.
         let maximum = WaveActiveMax(fetch_value);
 
         // Store the result if this maximum is for this lane.
