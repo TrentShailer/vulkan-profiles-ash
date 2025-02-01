@@ -1,7 +1,12 @@
 # Vulkan Profiles Ash (`vp-ash`)
-Bindings to the [Vulkan Profiles API](https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html) in Rust for [ash](https://github.com/ash-rs/ash). Using the beta Capabilities API.
+Bindings to the [Vulkan Profiles API](https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html) 
+in Rust for [ash](https://github.com/ash-rs/ash). Using the beta Capabilities API.
 
-## **NOTICE: This is a personal project not intended to be consumed by the general public. Use at your own risk.**
+> [!CAUTION] 
+> ### This is a personal project
+>
+> Maintanance, bug fixes, new features, and support will only be provided when/if I feel like it.
+>
 
 ## Restrictions:
 * Bindings are written against the [Vulkan Profiles Tools included in Vulkan SDK 1.3.296](https://github.com/KhronosGroup/Vulkan-Profiles/tree/v1.3.296).
