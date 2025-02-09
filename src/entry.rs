@@ -4,17 +4,22 @@ use ash::{prelude::VkResult, vk, RawPtr};
 
 use crate::vp;
 
+/// The Vulkan Profiles entry, roughly equivalent to an [ash::Entry].
 pub struct Entry {
     entry_fn: EntryFn,
 }
 
 impl Entry {
+    /// Create the [`Entry`] object using a statically linked function pointers.
     pub fn linked() -> Self {
         Self {
             entry_fn: EntryFn::linked(),
         }
     }
 
+    /// Creates allocator object.
+    ///
+    /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#basic-usage>
     pub unsafe fn create_capabilities(
         &self,
         capabilities_create_info: &vp::CapabilitiesCreateInfo<'_>,
@@ -32,11 +37,15 @@ impl Entry {
     }
 }
 
+#[derive(Clone)]
+/// Function pointer table for the [`Entry`].
 pub struct EntryFn {
     pub create_capabilities: vp::PFN_vpCreateCapabilities,
 }
+
 impl EntryFn {
-    pub fn linked() -> Self {
+    /// Load the function pointers from the statically linked library.
+    pub(crate) fn linked() -> Self {
         Self {
             create_capabilities: vp::linked::vpCreateCapabilities,
         }

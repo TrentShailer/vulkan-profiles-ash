@@ -1,3 +1,7 @@
+//! # vp-ash
+//! Bindings to the Vulkan Profiles Library using ash.
+//!
+
 #![warn(
     clippy::alloc_instead_of_core,
     clippy::use_self,

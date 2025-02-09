@@ -15,7 +15,7 @@ pub const VP_MAX_PROFILE_NAME_SIZE: usize = 256;
 
 #[repr(C)]
 #[derive(Clone, Copy, PartialEq, Eq)]
-/// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#checking-instance-level-support>
+/// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#checking-instance-level-support>
 pub struct ProfileProperties {
     pub profile_name: [ffi::c_char; VP_MAX_PROFILE_NAME_SIZE],
     pub spec_version: u32,
@@ -60,7 +60,7 @@ impl fmt::Debug for ProfileProperties {
 
 #[repr(C)]
 #[derive(Clone, Copy, PartialEq, Eq)]
-/// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#checking-instance-level-support>
+/// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#checking-instance-level-support>
 pub struct BlockProperties {
     pub profiles: ProfileProperties,
     pub api_version: u32,
@@ -113,7 +113,7 @@ impl fmt::Debug for BlockProperties {
 
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-/// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#creating-instance-with-profile>
+/// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#creating-instance-with-profile>
 pub struct InstanceCreateFlags(pub(crate) vk::Flags);
 ash::vk_bitflags_wrapped!(InstanceCreateFlags, vk::Flags);
 impl InstanceCreateFlags {}
@@ -121,7 +121,7 @@ impl InstanceCreateFlags {}
 #[repr(C)]
 #[cfg_attr(feature = "debug", derive(Debug))]
 #[derive(Clone, Copy)]
-/// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#creating-instance-with-profile>
+/// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#creating-instance-with-profile>
 pub struct InstanceCreateInfo<'a> {
     pub p_create_info: *const vk::InstanceCreateInfo<'a>,
     pub flags: InstanceCreateFlags,
@@ -165,7 +165,7 @@ impl<'a> InstanceCreateInfo<'a> {
 
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-/// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#creating-device-with-profile>
+/// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#creating-device-with-profile>
 pub struct DeviceCreateFlags(pub(crate) vk::Flags);
 ash::vk_bitflags_wrapped!(DeviceCreateFlags, vk::Flags);
 
@@ -178,7 +178,7 @@ impl DeviceCreateFlags {
 #[repr(C)]
 #[cfg_attr(feature = "debug", derive(Debug))]
 #[derive(Clone, Copy)]
-/// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#creating-device-with-profile>
+/// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#creating-device-with-profile>
 pub struct DeviceCreateInfo<'a> {
     pub p_create_info: *const vk::DeviceCreateInfo<'a>,
     pub flags: DeviceCreateFlags,

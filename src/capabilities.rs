@@ -10,12 +10,14 @@ use crate::{
 };
 
 #[derive(Clone)]
+/// The Vulkan Profiles capabilities, roughly equivalent to an [`ash::Device`].
 pub struct Capabilities {
     handle: vp::Capabilities,
     fp: CapabilitiesFn,
 }
 
 impl Capabilities {
+    /// Create the [`Capabilities`] object using a handle and statically linked function pointers.
     pub fn linked(handle: vp::Capabilities) -> Self {
         Self {
             handle,
@@ -23,6 +25,7 @@ impl Capabilities {
         }
     }
 
+    /// Returns the underlying [`vp::Capabilities`] handle.
     pub fn handle(&self) -> vp::Capabilities {
         self.handle
     }
@@ -32,6 +35,7 @@ impl Capabilities {
         &self.fp
     }
 
+    /// Destroys allocator object.
     pub unsafe fn destroy_capabilities(
         &self,
         allocation_callbacks: Option<&vk::AllocationCallbacks<'_>>,
@@ -39,14 +43,18 @@ impl Capabilities {
         (self.fp.destroy_capabilities)(self.handle, allocation_callbacks.as_raw_ptr());
     }
 
-    /// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#query-profiles>
+    /// Query the list of available profiles in the library.
+    ///
+    /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#query-profiles>
     pub unsafe fn get_profiles(&self) -> VkResult<Vec<vp::ProfileProperties>> {
         read_into_uninitialized_vector(|count, data| {
             (self.fp.get_profiles)(self.handle, count, data)
         })
     }
 
-    /// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#query-profile-required-profiles>
+    /// List the required profiles of a profile.
+    ///
+    /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#query-profile-required-profiles>
     pub unsafe fn get_profile_required_profiles(
         &self,
         profile_properties: &vp::ProfileProperties,
@@ -56,7 +64,9 @@ impl Capabilities {
         })
     }
 
-    /// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#query-profile-vulkan-api-version>
+    /// Query the profile required Vulkan API version.
+    ///
+    /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#query-profile-vulkan-api-version>
     pub unsafe fn get_profile_api_version(
         &self,
         profile_properties: &vp::ProfileProperties,
@@ -64,7 +74,9 @@ impl Capabilities {
         (self.fp.get_profile_api_version)(self.handle, profile_properties)
     }
 
-    /// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#query-profile-fallbacks>
+    /// List the recommended fallback profiles of a profile.
+    ///
+    /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#query-profile-fallbacks>
     pub unsafe fn get_profile_fallbacks(
         &self,
         profile_properties: &vp::ProfileProperties,
@@ -74,7 +86,11 @@ impl Capabilities {
         })
     }
 
-    /// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#query-profile-with-multiple-variants>
+    /// Query whether the profile has multiple variants. Profiles with multiple variants can only
+    /// use vpGetInstanceProfileSupport and vpGetPhysicalDeviceProfileSupport capabilities of the
+    /// library. Other function will return a VK_ERROR_UNKNOWN error.
+    ///
+    /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#query-profile-with-multiple-variants>
     pub unsafe fn has_multiple_variants_profile(
         &self,
         profile_properties: &vp::ProfileProperties,
@@ -90,7 +106,9 @@ impl Capabilities {
         Ok(has_multiple_variants == vk::TRUE)
     }
 
-    /// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#checking-instance-level-support>
+    /// Check whether a profile is supported at the instance level.
+    ///
+    /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#checking-instance-level-support>
     pub unsafe fn get_instance_profile_support(
         &self,
         layer_name: Option<&CStr>,
@@ -113,7 +131,10 @@ impl Capabilities {
         Ok(supported == vk::TRUE)
     }
 
-    /// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#checking-instance-level-support>
+    /// Check whether a variant of a profile is supported at the instance level and report this list
+    /// of blocks used to validate the profiles.
+    ///
+    /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#checking-instance-level-support>
     pub unsafe fn get_instance_profile_variants_support(
         &self,
         layer_name: Option<&CStr>,
@@ -143,7 +164,9 @@ impl Capabilities {
         }
     }
 
-    /// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#creating-instance-with-profile>
+    /// Create a VkInstance with the profile instance extensions enabled.
+    ///
+    /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#creating-instance-with-profile>
     pub unsafe fn create_instance(
         &self,
         entry: &ash::Entry,
@@ -161,7 +184,9 @@ impl Capabilities {
         Ok(ash::Instance::load(entry.static_fn(), instance))
     }
 
-    /// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#checking-device-level-support>
+    /// Check whether a profile is supported by the physical device.
+    ///
+    /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#checking-device-level-support>
     pub unsafe fn get_physical_device_profile_support(
         &self,
         instance: &ash::Instance,
@@ -180,7 +205,10 @@ impl Capabilities {
         Ok(supported == vk::TRUE)
     }
 
-    /// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#checking-device-level-support>
+    /// Check whether a variant of a profile is supported by the physical device and report this
+    /// list of blocks used to validate the profiles.
+    ///
+    /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#checking-device-level-support>
     pub unsafe fn get_physical_device_profile_variants_support(
         &self,
         instance: &ash::Instance,
@@ -206,7 +234,9 @@ impl Capabilities {
         }
     }
 
-    /// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#creating-device-with-profile>
+    /// Create a VkDevice with the profile features and device extensions enabled.
+    ///
+    /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#creating-device-with-profile>
     pub unsafe fn create_device(
         &self,
         instance: &ash::Instance,
@@ -226,7 +256,9 @@ impl Capabilities {
         Ok(ash::Device::load(instance.fp_v1_0(), device))
     }
 
-    /// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#query-profile-instance-extensions>
+    /// Query the list of instance extensions of a profile.
+    ///
+    /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#query-profile-instance-extensions>
     pub unsafe fn get_profile_instance_extension_properties(
         &self,
         profile_properties: &vp::ProfileProperties,
@@ -248,7 +280,9 @@ impl Capabilities {
         })
     }
 
-    /// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#query-profile-device-extensions>
+    /// Query the list of device extensions of a profile.
+    ///
+    /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#query-profile-device-extensions>
     pub unsafe fn get_profile_device_extension_properties(
         &self,
         profile_properties: &vp::ProfileProperties,
@@ -270,7 +304,9 @@ impl Capabilities {
         })
     }
 
-    /// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#query-profile-features>
+    /// Fill the feature structures with the requirements of a profile.
+    ///
+    /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#query-profile-features>
     pub unsafe fn get_profile_features(
         &self,
         profile_properties: &vp::ProfileProperties,
@@ -291,7 +327,9 @@ impl Capabilities {
         .result()
     }
 
-    /// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#query-profile-features>
+    /// Query the list of feature structure types specified by the profile.
+    ///
+    /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#query-profile-features>
     pub unsafe fn get_profile_feature_structure_types(
         &self,
         profile_properties: &vp::ProfileProperties,
@@ -313,7 +351,9 @@ impl Capabilities {
         })
     }
 
-    /// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#query-profile-device-properties>
+    /// Fill the property structures with the requirements of a profile.
+    ///
+    /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#query-profile-device-properties>
     pub unsafe fn get_profile_properties(
         &self,
         profile_properties: &vp::ProfileProperties,
@@ -334,7 +374,9 @@ impl Capabilities {
         .result()
     }
 
-    /// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#query-profile-device-properties>
+    /// Query the list of property structure types specified by the profile.
+    ///
+    /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#query-profile-device-properties>
     pub unsafe fn get_profile_property_structure_types(
         &self,
         profile_properties: &vp::ProfileProperties,
@@ -356,73 +398,8 @@ impl Capabilities {
         })
     }
 
-    /// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#query-profile-format-properties>
-    pub unsafe fn get_profile_formats(
-        &self,
-        profile_properties: &vp::ProfileProperties,
-        block_name: Option<&CStr>,
-    ) -> VkResult<Vec<vk::Format>> {
-        let block_name_ptr = match block_name {
-            Some(name) => name.as_ptr(),
-            None => core::ptr::null(),
-        };
-
-        read_into_uninitialized_vector(|count, data| {
-            (self.fp.get_profile_formats)(
-                self.handle,
-                profile_properties,
-                block_name_ptr,
-                count,
-                data,
-            )
-        })
-    }
-
-    /// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#query-profile-format-properties>
-    pub unsafe fn get_profile_format_properties(
-        &self,
-        profile_properties: &vp::ProfileProperties,
-        block_name: Option<&CStr>,
-        format: vk::Format,
-        properties: &mut vk::FormatProperties2<'_>,
-    ) -> VkResult<()> {
-        let block_name_ptr = match block_name {
-            Some(name) => name.as_ptr(),
-            None => core::ptr::null(),
-        };
-
-        (self.fp.get_profile_format_properties)(
-            self.handle,
-            profile_properties,
-            block_name_ptr,
-            format,
-            <*mut _>::cast(properties),
-        )
-        .result()
-    }
-
-    /// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#query-profile-format-properties>
-    pub unsafe fn get_profile_format_structure_types(
-        &self,
-        profile_properties: &vp::ProfileProperties,
-        block_name: Option<&CStr>,
-    ) -> VkResult<Vec<vk::StructureType>> {
-        let block_name_ptr = match block_name {
-            Some(name) => name.as_ptr(),
-            None => core::ptr::null(),
-        };
-
-        read_into_uninitialized_vector(|count, data| {
-            (self.fp.get_profile_format_structure_types)(
-                self.handle,
-                profile_properties,
-                block_name_ptr,
-                count,
-                data,
-            )
-        })
-    }
-
+    /// Fill the queue family property structures with the requirements of a profile.
+    ///
     /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#query-profile-queue-family-properties>
     pub unsafe fn get_profile_queue_family_properties(
         &self,
@@ -445,6 +422,8 @@ impl Capabilities {
         })
     }
 
+    /// Query the list of queue family property structure types specified by the profile.
+    ///
     /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#query-profile-queue-family-properties>
     pub unsafe fn get_profile_queue_family_structure_types(
         &self,
@@ -466,9 +445,83 @@ impl Capabilities {
             )
         })
     }
+
+    /// Query the list of formats with specified requirements by a profile.
+    ///
+    /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#query-profile-format-properties>
+    pub unsafe fn get_profile_formats(
+        &self,
+        profile_properties: &vp::ProfileProperties,
+        block_name: Option<&CStr>,
+    ) -> VkResult<Vec<vk::Format>> {
+        let block_name_ptr = match block_name {
+            Some(name) => name.as_ptr(),
+            None => core::ptr::null(),
+        };
+
+        read_into_uninitialized_vector(|count, data| {
+            (self.fp.get_profile_formats)(
+                self.handle,
+                profile_properties,
+                block_name_ptr,
+                count,
+                data,
+            )
+        })
+    }
+
+    /// Query the requirements of a format for a profile.
+    ///
+    /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#query-profile-format-properties>
+    pub unsafe fn get_profile_format_properties(
+        &self,
+        profile_properties: &vp::ProfileProperties,
+        block_name: Option<&CStr>,
+        format: vk::Format,
+        properties: &mut vk::FormatProperties2<'_>,
+    ) -> VkResult<()> {
+        let block_name_ptr = match block_name {
+            Some(name) => name.as_ptr(),
+            None => core::ptr::null(),
+        };
+
+        (self.fp.get_profile_format_properties)(
+            self.handle,
+            profile_properties,
+            block_name_ptr,
+            format,
+            <*mut _>::cast(properties),
+        )
+        .result()
+    }
+
+    /// Query the list of format structure types specified by the profile.
+    ///
+    /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#query-profile-format-properties>
+    pub unsafe fn get_profile_format_structure_types(
+        &self,
+        profile_properties: &vp::ProfileProperties,
+        block_name: Option<&CStr>,
+    ) -> VkResult<Vec<vk::StructureType>> {
+        let block_name_ptr = match block_name {
+            Some(name) => name.as_ptr(),
+            None => core::ptr::null(),
+        };
+
+        read_into_uninitialized_vector(|count, data| {
+            (self.fp.get_profile_format_structure_types)(
+                self.handle,
+                profile_properties,
+                block_name_ptr,
+                count,
+                data,
+            )
+        })
+    }
 }
 
 #[derive(Clone)]
+/// Function pointer table for [Capabilities].
 pub struct CapabilitiesFn {
     pub destroy_capabilities: vp::PFN_vpDestroyCapabilities,
     pub get_profiles: vp::PFN_vpGetProfiles,
@@ -497,7 +550,7 @@ pub struct CapabilitiesFn {
 }
 
 impl CapabilitiesFn {
-    /// Initializes the table from the statically linked library
+    /// Load the function pointers from the statically linked library.
     pub(crate) fn linked() -> Self {
         Self {
             destroy_capabilities: vp::linked::vpDestroyCapabilities,
