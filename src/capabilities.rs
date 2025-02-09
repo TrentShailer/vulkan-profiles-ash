@@ -400,26 +400,34 @@ impl Capabilities {
 
     /// Fill the queue family property structures with the requirements of a profile.
     ///
+    /// Returns the number of queue family properties.
+    ///
     /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#query-profile-queue-family-properties>
     pub unsafe fn get_profile_queue_family_properties(
         &self,
         profile_properties: &vp::ProfileProperties,
         block_name: Option<&CStr>,
-    ) -> VkResult<Vec<vk::QueueFamilyProperties2KHR<'_>>> {
+        property_count: &mut u32,
+        queue_family_properties: Option<&mut [vk::QueueFamilyProperties2KHR<'_>]>,
+    ) -> VkResult<()> {
         let block_name_ptr = match block_name {
             Some(name) => name.as_ptr(),
             None => core::ptr::null(),
         };
 
-        read_into_uninitialized_vector(|count, data| {
-            (self.fp.get_profile_queue_family_properties)(
-                self.handle,
-                profile_properties,
-                block_name_ptr,
-                count,
-                data,
-            )
-        })
+        let queue_family_properties_ptr = match queue_family_properties {
+            Some(properties) => properties.as_mut_ptr(),
+            None => core::ptr::null_mut(),
+        };
+
+        (self.fp.get_profile_queue_family_properties)(
+            self.handle,
+            profile_properties,
+            block_name_ptr,
+            property_count,
+            queue_family_properties_ptr,
+        )
+        .result()
     }
 
     /// Query the list of queue family property structure types specified by the profile.
