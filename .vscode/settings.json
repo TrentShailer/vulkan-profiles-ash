@@ -1,0 +1,5 @@
+{
+    "rust-analyzer.cargo.features": [
+        "VK_KHR_video_queue"
+    ]
+}

@@ -36,6 +36,10 @@ fn main() {
         .include(&vulkan_include_dir)
         .define("VP_USE_OBJECT", "1");
 
+    #[cfg(feature = "VK_KHR_video_queue")]
+    build.define("VK_KHR_video_queue", "1");
+
+    // Platform defines
     #[cfg(feature = "VK_USE_PLATFORM_ANDROID_KHR")]
     build.define("VK_USE_PLATFORM_ANDROID_KHR", "1");
     #[cfg(feature = "VK_USE_PLATFORM_FUCHSIA")]
@@ -66,6 +70,8 @@ fn main() {
     build.define("VK_USE_PLATFORM_SCREEN_QNX", "1");
     #[cfg(feature = "VK_USE_PLATFORM_SCI")]
     build.define("VK_USE_PLATFORM_SCI", "1");
+
+    // Beta define
     #[cfg(feature = "VK_ENABLE_BETA_EXTENSIONS")]
     build.define("VK_ENABLE_BETA_EXTENSIONS", "1");
 

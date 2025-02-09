@@ -225,6 +225,40 @@ impl<'a> DeviceCreateInfo<'a> {
     }
 }
 
+#[repr(C)]
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub struct VideoProfileProperties {
+    pub name: [ffi::c_char; VP_MAX_PROFILE_NAME_SIZE],
+}
+
+impl Default for VideoProfileProperties {
+    fn default() -> Self {
+        Self {
+            name: unsafe { core::mem::zeroed() },
+        }
+    }
+}
+
+impl VideoProfileProperties {
+    pub fn name(mut self, name: &CStr) -> Result<Self, CStrTooLargeForStaticArray> {
+        write_c_str_slice_with_nul(self.name.as_mut_slice(), name)?;
+        Ok(self)
+    }
+
+    pub fn name_as_c_str(&self) -> Result<&CStr, FromBytesUntilNulError> {
+        wrap_c_str_slice_until_nul(&self.name)
+    }
+}
+
+#[cfg(feature = "debug")]
+impl fmt::Debug for VideoProfileProperties {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("VideoProfileProperties")
+            .field("name", &unsafe { CStr::from_ptr(self.name.as_ptr()) })
+            .finish()
+    }
+}
+
 define_handle!(Capabilities, DEVICE);
 
 #[repr(transparent)]
