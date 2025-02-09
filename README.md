@@ -34,7 +34,7 @@ See [the Compute example](./examples/compute.rs).
 
 ## Development
 
-- Run Tests: `cargo test --features test`
+- Run Tests: `cargo test --features "test,VK_KHR_video_queue"`
 - Run Examples: `cargo run --example <example> --features example`
 - Compiling Test Profiles:
     ```powershell
