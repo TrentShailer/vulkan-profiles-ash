@@ -2,18 +2,17 @@ mod common;
 
 use ash::vk;
 use common::{
-    all_expected_profiles_exist, setup, FALLBACK, FALLBACK_FALLBACK, REQUIRES, SUPPORTED,
-    UNSUPPORTED_DEVICE, UNSUPPORTED_INSTANCE, VARIANTS_DEVICE_UNSUPPORTED,
-    VARIANTS_INSTANCE_UNSUPPORTED, VARIANTS_SUPPORTED,
+    all_expected_profiles_exist, setup, supported_profile, video_profile, FALLBACK,
+    FALLBACK_FALLBACK, REQUIRES, UNSUPPORTED_DEVICE, UNSUPPORTED_INSTANCE,
+    VARIANTS_DEVICE_UNSUPPORTED, VARIANTS_INSTANCE_UNSUPPORTED, VARIANTS_SUPPORTED,
 };
 use vp_ash::vp;
 
 #[test]
 fn get_all_profiles() {
     let expected_profiles = vec![
-        vp::ProfileProperties::default()
-            .profile_name(SUPPORTED)
-            .unwrap(),
+        supported_profile(),
+        video_profile(),
         vp::ProfileProperties::default()
             .profile_name(UNSUPPORTED_DEVICE)
             .unwrap(),
@@ -59,9 +58,7 @@ pub fn get_profile_required_profiles() {
         .profile_name(REQUIRES)
         .unwrap();
 
-    let expected_profiles = vec![vp::ProfileProperties::default()
-        .profile_name(SUPPORTED)
-        .unwrap()];
+    let expected_profiles = vec![supported_profile()];
 
     let (_, _, capabilities) = setup();
 
@@ -82,9 +79,7 @@ pub fn get_profile_required_profiles() {
 
 #[test]
 pub fn get_profile_required_profiles_none() {
-    let profile = vp::ProfileProperties::default()
-        .profile_name(SUPPORTED)
-        .unwrap();
+    let profile = supported_profile();
 
     let (_, _, capabilities) = setup();
 
@@ -98,9 +93,7 @@ pub fn get_profile_required_profiles_none() {
 
 #[test]
 fn get_profile_api_version() {
-    let profile = vp::ProfileProperties::default()
-        .profile_name(SUPPORTED)
-        .unwrap();
+    let profile = supported_profile();
 
     let (_, _, capabilities) = setup();
 
@@ -133,9 +126,7 @@ fn get_profile_fallbacks() {
 
 #[test]
 fn get_profile_fallbacks_none() {
-    let profile = vp::ProfileProperties::default()
-        .profile_name(SUPPORTED)
-        .unwrap();
+    let profile = supported_profile();
 
     let (_, _, capabilities) = setup();
 
@@ -194,9 +185,7 @@ fn has_multiple_variants_3() {
 
 #[test]
 fn has_multiple_variants_none() {
-    let profile = vp::ProfileProperties::default()
-        .profile_name(SUPPORTED)
-        .unwrap();
+    let profile = supported_profile();
 
     let (_, _, capabilities) = setup();
 

@@ -2,16 +2,14 @@ mod common;
 
 use ash::vk;
 use common::{
-    blocks_match, setup, setup_instance, SUPPORTED, UNSUPPORTED_DEVICE,
+    blocks_match, setup, setup_instance, supported_profile, UNSUPPORTED_DEVICE,
     VARIANTS_DEVICE_UNSUPPORTED, VARIANTS_SUPPORTED,
 };
 use vp_ash::vp;
 
 #[test]
 fn supported_device() {
-    let profile = vp::ProfileProperties::default()
-        .profile_name(SUPPORTED)
-        .unwrap();
+    let profile = supported_profile();
 
     let (_, _, capabilities) = setup();
     let (_, instance) = setup_instance(&capabilities, profile);
@@ -133,9 +131,7 @@ fn unsupported_device_variants() {
 
 #[test]
 fn device_creation() {
-    let profiles = [vp::ProfileProperties::default()
-        .profile_name(SUPPORTED)
-        .unwrap()];
+    let profiles = [supported_profile()];
 
     let (_, _, capabilities) = setup();
     let (_, instance) = setup_instance(&capabilities, profiles[0]);
@@ -170,9 +166,7 @@ fn device_creation() {
 
 #[test]
 fn device_creation_blocks() {
-    let profile = vp::ProfileProperties::default()
-        .profile_name(SUPPORTED)
-        .unwrap();
+    let profile = supported_profile();
     let blocks = [vp::BlockProperties::default()
         .block_name(c"baseline")
         .unwrap()

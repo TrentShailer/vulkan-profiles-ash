@@ -2,16 +2,14 @@ mod common;
 
 use ash::vk;
 use common::{
-    blocks_match, setup, SUPPORTED, UNSUPPORTED_INSTANCE, VARIANTS_INSTANCE_UNSUPPORTED,
+    blocks_match, setup, supported_profile, UNSUPPORTED_INSTANCE, VARIANTS_INSTANCE_UNSUPPORTED,
     VARIANTS_SUPPORTED,
 };
 use vp_ash::vp;
 
 #[test]
 fn supported_instance() {
-    let profile = vp::ProfileProperties::default()
-        .profile_name(SUPPORTED)
-        .unwrap();
+    let profile = supported_profile();
 
     let (_, _, capabilities) = setup();
 
@@ -123,9 +121,7 @@ fn unsupported_instance_variants() {
 
 #[test]
 fn instance_creation() {
-    let profiles = [vp::ProfileProperties::default()
-        .profile_name(SUPPORTED)
-        .unwrap()];
+    let profiles = [supported_profile()];
 
     let entry = ash::Entry::linked();
     let (_, _, capabilities) = setup();
@@ -145,9 +141,7 @@ fn instance_creation() {
 
 #[test]
 fn instance_creation_blocks() {
-    let profile = vp::ProfileProperties::default()
-        .profile_name(SUPPORTED)
-        .unwrap();
+    let profile = supported_profile();
     let blocks = [vp::BlockProperties::default()
         .block_name(c"baseline")
         .unwrap()

@@ -1,6 +1,5 @@
 use ash::{ext, khr, vk};
-use common::{setup, SUPPORTED};
-use vp_ash::vp;
+use common::{setup, supported_profile};
 
 mod common;
 
@@ -11,9 +10,7 @@ fn instance_extension_properties() {
         .unwrap()
         .spec_version(1)];
 
-    let profile = vp::ProfileProperties::default()
-        .profile_name(SUPPORTED)
-        .unwrap();
+    let profile = supported_profile();
 
     let (_, _, capabilities) = setup();
 
@@ -55,9 +52,7 @@ fn device_extension_properties() {
             .spec_version(1),
     ];
 
-    let profile = vp::ProfileProperties::default()
-        .profile_name(SUPPORTED)
-        .unwrap();
+    let profile = supported_profile();
 
     let (_, _, capabilities) = setup();
 
@@ -87,9 +82,7 @@ fn profile_features_s_types() {
         vk::StructureType::PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES,
     ];
 
-    let profile = vp::ProfileProperties::default()
-        .profile_name(SUPPORTED)
-        .unwrap();
+    let profile = supported_profile();
 
     let (_, _, capabilities) = setup();
 
@@ -112,9 +105,7 @@ fn profile_features_s_types() {
 
 #[test]
 fn profile_features() {
-    let profile = vp::ProfileProperties::default()
-        .profile_name(SUPPORTED)
-        .unwrap();
+    let profile = supported_profile();
 
     let (_, _, capabilities) = setup();
 
@@ -138,9 +129,7 @@ fn profile_property_s_types() {
         vk::StructureType::PHYSICAL_DEVICE_SUBGROUP_PROPERTIES,
     ];
 
-    let profile = vp::ProfileProperties::default()
-        .profile_name(SUPPORTED)
-        .unwrap();
+    let profile = supported_profile();
 
     let (_, _, capabilities) = setup();
 
@@ -163,9 +152,7 @@ fn profile_property_s_types() {
 
 #[test]
 fn profile_properties() {
-    let profile = vp::ProfileProperties::default()
-        .profile_name(SUPPORTED)
-        .unwrap();
+    let profile = supported_profile();
 
     let (_, _, capabilities) = setup();
 
@@ -191,9 +178,7 @@ fn profile_queue_family_s_types() {
         vk::StructureType::QUEUE_FAMILY_PROPERTIES_2_KHR,
     ];
 
-    let profile = vp::ProfileProperties::default()
-        .profile_name(SUPPORTED)
-        .unwrap();
+    let profile = supported_profile();
 
     let (_, _, capabilities) = setup();
 
@@ -218,9 +203,7 @@ fn profile_queue_family_s_types() {
 fn profile_queue_family_properties_count() {
     let expected = 2;
 
-    let profile = vp::ProfileProperties::default()
-        .profile_name(SUPPORTED)
-        .unwrap();
+    let profile = supported_profile();
 
     let (_, _, capabilities) = setup();
 
@@ -239,9 +222,7 @@ fn profile_queue_family_properties_incomplete() {
         .queue_count(2)
         .queue_flags(vk::QueueFlags::COMPUTE | vk::QueueFlags::GRAPHICS);
 
-    let profile = vp::ProfileProperties::default()
-        .profile_name(SUPPORTED)
-        .unwrap();
+    let profile = supported_profile();
 
     let (_, _, capabilities) = setup();
 
@@ -285,9 +266,7 @@ fn profile_queue_family_properties() {
         )
         .push_next(&mut expected_1_video);
 
-    let profile = vp::ProfileProperties::default()
-        .profile_name(SUPPORTED)
-        .unwrap();
+    let profile = supported_profile();
 
     let (_, _, capabilities) = setup();
 
@@ -338,9 +317,7 @@ fn profile_format_s_types() {
         vk::StructureType::FORMAT_PROPERTIES_3,
     ];
 
-    let profile = vp::ProfileProperties::default()
-        .profile_name(SUPPORTED)
-        .unwrap();
+    let profile = supported_profile();
 
     let (_, _, capabilities) = setup();
 
@@ -364,9 +341,7 @@ fn profile_format_s_types() {
 fn profile_formats() {
     let expected_formats = [vk::Format::R8G8B8A8_UNORM];
 
-    let profile = vp::ProfileProperties::default()
-        .profile_name(SUPPORTED)
-        .unwrap();
+    let profile = supported_profile();
 
     let (_, _, capabilities) = setup();
 
@@ -384,9 +359,7 @@ fn profile_formats() {
 
 #[test]
 fn profile_format_properties() {
-    let profile = vp::ProfileProperties::default()
-        .profile_name(SUPPORTED)
-        .unwrap();
+    let profile = supported_profile();
 
     let (_, _, capabilities) = setup();
 
