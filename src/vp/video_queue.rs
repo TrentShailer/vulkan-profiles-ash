@@ -162,22 +162,28 @@ impl Capabilities {
         profile_properties: &vp::ProfileProperties,
         block_name: Option<&CStr>,
         video_profile_index: u32,
-    ) -> VkResult<Vec<vk::VideoFormatPropertiesKHR<'_>>> {
+        property_count: &mut u32,
+        format_properties: Option<&mut [vk::VideoFormatPropertiesKHR<'_>]>,
+    ) -> VkResult<()> {
         let block_name_ptr = match block_name {
             Some(name) => name.as_ptr(),
             None => core::ptr::null(),
         };
 
-        read_into_uninitialized_vector(|count, data| {
-            (self.fp.get_profile_video_format_properties)(
-                self.handle,
-                profile_properties,
-                block_name_ptr,
-                video_profile_index,
-                count,
-                data,
-            )
-        })
+        let format_properties_ptr = match format_properties {
+            Some(properties) => properties.as_mut_ptr(),
+            None => core::ptr::null_mut(),
+        };
+
+        (self.fp.get_profile_video_format_properties)(
+            self.handle,
+            profile_properties,
+            block_name_ptr,
+            video_profile_index,
+            property_count,
+            format_properties_ptr,
+        )
+        .result()
     }
 
     /// Query the list of video format property structure types specified by the profile for a video
