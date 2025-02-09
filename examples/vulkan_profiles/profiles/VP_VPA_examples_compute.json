@@ -26,7 +26,17 @@
                         "VK_SUBGROUP_FEATURE_ARITHMETIC_BIT"
                     ]
                 }
-            }
+            },
+            "queueFamiliesProperties": [
+                {
+                    "VkQueueFamilyProperties": {
+                        "queueCount": 1,
+                        "queueFlags": [
+                            "VK_QUEUE_COMPUTE_BIT"
+                        ]
+                    }
+                }
+            ]
         },
         "debug": {
             "extensions": {

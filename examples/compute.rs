@@ -118,23 +118,11 @@ fn main() {
             .unwrap()
             .into_iter()
             .filter(|&device| unsafe {
-                let supported = capabilities
+                capabilities
                     .get_physical_device_profile_support(&instance, device, &core_profile)
-                    .unwrap();
-                if ! supported{
-                    return  false;
-                }
-
-                let queue_properties =
-                    instance.get_physical_device_queue_family_properties(device);
-
-                queue_properties
-                    .into_iter()
-                    .any(| properties| {
-                        properties.queue_count >= 1
-                                && properties.queue_flags.contains(vk::QueueFlags::COMPUTE)
-                    })
-            }).min_by_key(|&device| {
+                    .unwrap()}
+            )
+            .min_by_key(|&device| {
                 let properties = unsafe {instance.get_physical_device_properties(device)};
 
                 match properties.device_type {
@@ -150,14 +138,36 @@ fn main() {
 
     // Get the queue family index.
     let queue_family_index = {
-        let queue_properties =
+        // Get the required properties
+        let required_properties = {
+            let mut required_properties = vk::QueueFamilyProperties2KHR::default();
+            let mut count = 1;
+            unsafe {
+                capabilities
+                    .get_profile_queue_family_properties(
+                        &core_profile,
+                        None,
+                        &mut count,
+                        Some(core::slice::from_mut(&mut required_properties)),
+                    )
+                    .unwrap()
+            };
+
+            required_properties.queue_family_properties
+        };
+
+        // Get the device properties
+        let properties =
             unsafe { instance.get_physical_device_queue_family_properties(physical_device) };
 
-        queue_properties
+        // Find the index that meets the requirements.
+        properties
             .into_iter()
             .position(|properties| {
-                properties.queue_count >= 1
-                    && properties.queue_flags.contains(vk::QueueFlags::COMPUTE)
+                properties.queue_count >= required_properties.queue_count
+                    && properties
+                        .queue_flags
+                        .contains(required_properties.queue_flags)
             })
             .unwrap() as u32
     };

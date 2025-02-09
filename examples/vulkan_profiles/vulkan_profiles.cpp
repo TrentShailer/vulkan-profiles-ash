@@ -415,6 +415,10 @@ static const VkStructureType propertyStructTypes[] = {
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_PROPERTIES,
 };
 
+static const VkStructureType queueFamilyStructTypes[] = {
+    VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2_KHR,
+};
+
 static const VpFeatureDesc featureDesc = {
     [](VkBaseOutStructure* p) { (void)p;
             switch (p->sType) {
@@ -460,6 +464,16 @@ static const VpStructChainerDesc chainerDesc = {
         pfnCb(p, pUser);
     },
     [](uint32_t count, VkBaseOutStructure* p, void* pUser, PFN_vpStructArrayChainerCb pfnCb) {
+        struct ExtStructs {
+        };
+        std::vector<ExtStructs> ext_structs{};
+        if (count > 0) {
+            ext_structs.resize(count);
+            VkQueueFamilyProperties2KHR* pArray = static_cast<VkQueueFamilyProperties2KHR*>(static_cast<void*>(p));
+            for (uint32_t i = 0; i < count; ++i) {
+                pArray[i].pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(nullptr));
+            }
+        }
         pfnCb(count, p, pUser);
     },
     [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
@@ -537,6 +551,33 @@ static const VpPropertyDesc propertyDesc = {
     }
 };
 
+static const VpQueueFamilyDesc queueFamilyDesc[] = {
+    {
+        [](VkBaseOutStructure* p) { (void)p;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2_KHR: {
+                    VkQueueFamilyProperties2KHR* s = static_cast<VkQueueFamilyProperties2KHR*>(static_cast<void*>(p));
+                    s->queueFamilyProperties.queueCount = 1;
+                    s->queueFamilyProperties.queueFlags |= (VK_QUEUE_COMPUTE_BIT);
+                } break;
+                default: break;
+            }
+        },
+        [](VkBaseOutStructure* p) -> bool { (void)p;
+            bool ret = true;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2_KHR: {
+                    VkQueueFamilyProperties2KHR* s = static_cast<VkQueueFamilyProperties2KHR*>(static_cast<void*>(p));
+                    ret = ret && (s->queueFamilyProperties.queueCount >= 1);
+                    ret = ret && (vpCheckFlags(s->queueFamilyProperties.queueFlags, (VK_QUEUE_COMPUTE_BIT)));
+                } break;
+                default: break;
+            }
+            return ret;
+        }
+    },
+};
+
 static const VpStructChainerDesc chainerDesc = {
     [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
         VkPhysicalDeviceTimelineSemaphoreFeatures physicalDeviceTimelineSemaphoreFeatures{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES, nullptr };
@@ -550,6 +591,16 @@ static const VpStructChainerDesc chainerDesc = {
         pfnCb(p, pUser);
     },
     [](uint32_t count, VkBaseOutStructure* p, void* pUser, PFN_vpStructArrayChainerCb pfnCb) {
+        struct ExtStructs {
+        };
+        std::vector<ExtStructs> ext_structs{};
+        if (count > 0) {
+            ext_structs.resize(count);
+            VkQueueFamilyProperties2KHR* pArray = static_cast<VkQueueFamilyProperties2KHR*>(static_cast<void*>(p));
+            for (uint32_t i = 0; i < count; ++i) {
+                pArray[i].pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(nullptr));
+            }
+        }
         pfnCb(count, p, pUser);
     },
     [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
@@ -677,8 +728,8 @@ namespace VP_VPA_EXAMPLES_COMPUTE {
                     blocks::baseline::featureDesc,
                     static_cast<uint32_t>(std::size(propertyStructTypes)), propertyStructTypes,
                     blocks::baseline::propertyDesc,
-                    0, nullptr,
-                    0, nullptr,
+                    static_cast<uint32_t>(std::size(queueFamilyStructTypes)), queueFamilyStructTypes,
+                    static_cast<uint32_t>(std::size(blocks::baseline::queueFamilyDesc)), blocks::baseline::queueFamilyDesc,
                     0, nullptr,
                     0, nullptr,
                     blocks::baseline::chainerDesc,
