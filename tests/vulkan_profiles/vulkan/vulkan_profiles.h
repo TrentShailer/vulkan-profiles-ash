@@ -46,7 +46,10 @@
 
 #if defined(VK_VERSION_1_2) && \
     defined(VK_EXT_debug_utils) && \
-    defined(VK_KHR_synchronization2)
+    defined(VK_KHR_synchronization2) && \
+    defined(VK_KHR_video_decode_av1) && \
+    defined(VK_KHR_video_decode_queue) && \
+    defined(VK_KHR_video_queue)
 #define VP_VPA_test_supported 1
 #define VP_VPA_TEST_SUPPORTED_NAME "VP_VPA_test_supported"
 #define VP_VPA_TEST_SUPPORTED_SPEC_VERSION 1

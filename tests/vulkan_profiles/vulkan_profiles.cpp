@@ -640,6 +640,9 @@ static const VkExtensionProperties instanceExtensions[] = {
 
 static const VkExtensionProperties deviceExtensions[] = {
     VkExtensionProperties{ VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME, 1 },
+    VkExtensionProperties{ VK_KHR_VIDEO_DECODE_AV1_EXTENSION_NAME, 1 },
+    VkExtensionProperties{ VK_KHR_VIDEO_DECODE_QUEUE_EXTENSION_NAME, 1 },
+    VkExtensionProperties{ VK_KHR_VIDEO_QUEUE_EXTENSION_NAME, 1 },
 };
 
 static const VpFeatureDesc featureDesc = {
@@ -746,6 +749,11 @@ static const VkStructureType propertyStructTypes[] = {
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_PROPERTIES,
 };
 
+static const VkStructureType queueFamilyStructTypes[] = {
+    VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2_KHR,
+    VK_STRUCTURE_TYPE_QUEUE_FAMILY_VIDEO_PROPERTIES_KHR,
+};
+
 static const VkStructureType formatStructTypes[] = {
     VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_2_KHR,
     VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_3_KHR,
@@ -757,6 +765,9 @@ static const VkExtensionProperties instanceExtensions[] = {
 
 static const VkExtensionProperties deviceExtensions[] = {
     VkExtensionProperties{ VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME, 1 },
+    VkExtensionProperties{ VK_KHR_VIDEO_DECODE_AV1_EXTENSION_NAME, 1 },
+    VkExtensionProperties{ VK_KHR_VIDEO_DECODE_QUEUE_EXTENSION_NAME, 1 },
+    VkExtensionProperties{ VK_KHR_VIDEO_QUEUE_EXTENSION_NAME, 1 },
 };
 
 static const VpFeatureDesc featureDesc = {
@@ -811,6 +822,18 @@ static const VpStructChainerDesc chainerDesc = {
         pfnCb(p, pUser);
     },
     [](uint32_t count, VkBaseOutStructure* p, void* pUser, PFN_vpStructArrayChainerCb pfnCb) {
+        struct ExtStructs {
+            VkQueueFamilyVideoPropertiesKHR queueFamilyVideoPropertiesKHR;
+        };
+        std::vector<ExtStructs> ext_structs{};
+        if (count > 0) {
+            ext_structs.resize(count);
+            VkQueueFamilyProperties2KHR* pArray = static_cast<VkQueueFamilyProperties2KHR*>(static_cast<void*>(p));
+            for (uint32_t i = 0; i < count; ++i) {
+                ext_structs[i].queueFamilyVideoPropertiesKHR = VkQueueFamilyVideoPropertiesKHR{ VK_STRUCTURE_TYPE_QUEUE_FAMILY_VIDEO_PROPERTIES_KHR, nullptr };
+                pArray[i].pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&ext_structs[i].queueFamilyVideoPropertiesKHR));
+            }
+        }
         pfnCb(count, p, pUser);
     },
     [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
@@ -829,6 +852,9 @@ static const VkExtensionProperties instanceExtensions[] = {
 
 static const VkExtensionProperties deviceExtensions[] = {
     VkExtensionProperties{ VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME, 1 },
+    VkExtensionProperties{ VK_KHR_VIDEO_DECODE_AV1_EXTENSION_NAME, 1 },
+    VkExtensionProperties{ VK_KHR_VIDEO_DECODE_QUEUE_EXTENSION_NAME, 1 },
+    VkExtensionProperties{ VK_KHR_VIDEO_QUEUE_EXTENSION_NAME, 1 },
 };
 
 static const VpFeatureDesc featureDesc = {
@@ -893,6 +919,65 @@ static const VpPropertyDesc propertyDesc = {
     }
 };
 
+static const VpQueueFamilyDesc queueFamilyDesc[] = {
+    {
+        [](VkBaseOutStructure* p) { (void)p;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2_KHR: {
+                    VkQueueFamilyProperties2KHR* s = static_cast<VkQueueFamilyProperties2KHR*>(static_cast<void*>(p));
+                    s->queueFamilyProperties.queueCount = 2;
+                    s->queueFamilyProperties.queueFlags |= (VK_QUEUE_COMPUTE_BIT | VK_QUEUE_GRAPHICS_BIT);
+                } break;
+                default: break;
+            }
+        },
+        [](VkBaseOutStructure* p) -> bool { (void)p;
+            bool ret = true;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2_KHR: {
+                    VkQueueFamilyProperties2KHR* s = static_cast<VkQueueFamilyProperties2KHR*>(static_cast<void*>(p));
+                    ret = ret && (s->queueFamilyProperties.queueCount >= 2);
+                    ret = ret && (vpCheckFlags(s->queueFamilyProperties.queueFlags, (VK_QUEUE_COMPUTE_BIT | VK_QUEUE_GRAPHICS_BIT)));
+                } break;
+                default: break;
+            }
+            return ret;
+        }
+    },
+    {
+        [](VkBaseOutStructure* p) { (void)p;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2_KHR: {
+                    VkQueueFamilyProperties2KHR* s = static_cast<VkQueueFamilyProperties2KHR*>(static_cast<void*>(p));
+                    s->queueFamilyProperties.queueCount = 1;
+                    s->queueFamilyProperties.queueFlags |= (VK_QUEUE_VIDEO_DECODE_BIT_KHR);
+                } break;
+                case VK_STRUCTURE_TYPE_QUEUE_FAMILY_VIDEO_PROPERTIES_KHR: {
+                    VkQueueFamilyVideoPropertiesKHR* s = static_cast<VkQueueFamilyVideoPropertiesKHR*>(static_cast<void*>(p));
+                    s->videoCodecOperations |= (VK_VIDEO_CODEC_OPERATION_DECODE_AV1_BIT_KHR);
+                } break;
+                default: break;
+            }
+        },
+        [](VkBaseOutStructure* p) -> bool { (void)p;
+            bool ret = true;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2_KHR: {
+                    VkQueueFamilyProperties2KHR* s = static_cast<VkQueueFamilyProperties2KHR*>(static_cast<void*>(p));
+                    ret = ret && (s->queueFamilyProperties.queueCount >= 1);
+                    ret = ret && (vpCheckFlags(s->queueFamilyProperties.queueFlags, (VK_QUEUE_VIDEO_DECODE_BIT_KHR)));
+                } break;
+                case VK_STRUCTURE_TYPE_QUEUE_FAMILY_VIDEO_PROPERTIES_KHR: {
+                    VkQueueFamilyVideoPropertiesKHR* s = static_cast<VkQueueFamilyVideoPropertiesKHR*>(static_cast<void*>(p));
+                    ret = ret && (vpCheckFlags(s->videoCodecOperations, (VK_VIDEO_CODEC_OPERATION_DECODE_AV1_BIT_KHR)));
+                } break;
+                default: break;
+            }
+            return ret;
+        }
+    },
+};
+
 static const VpFormatDesc formatDesc[] = {
     {
         VK_FORMAT_R8G8B8A8_UNORM,
@@ -935,6 +1020,18 @@ static const VpStructChainerDesc chainerDesc = {
         pfnCb(p, pUser);
     },
     [](uint32_t count, VkBaseOutStructure* p, void* pUser, PFN_vpStructArrayChainerCb pfnCb) {
+        struct ExtStructs {
+            VkQueueFamilyVideoPropertiesKHR queueFamilyVideoPropertiesKHR;
+        };
+        std::vector<ExtStructs> ext_structs{};
+        if (count > 0) {
+            ext_structs.resize(count);
+            VkQueueFamilyProperties2KHR* pArray = static_cast<VkQueueFamilyProperties2KHR*>(static_cast<void*>(p));
+            for (uint32_t i = 0; i < count; ++i) {
+                ext_structs[i].queueFamilyVideoPropertiesKHR = VkQueueFamilyVideoPropertiesKHR{ VK_STRUCTURE_TYPE_QUEUE_FAMILY_VIDEO_PROPERTIES_KHR, nullptr };
+                pArray[i].pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&ext_structs[i].queueFamilyVideoPropertiesKHR));
+            }
+        }
         pfnCb(count, p, pUser);
     },
     [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
@@ -1798,8 +1895,8 @@ namespace VP_VPA_TEST_SUPPORTED {
                     blocks::baseline::featureDesc,
                     static_cast<uint32_t>(std::size(propertyStructTypes)), propertyStructTypes,
                     blocks::baseline::propertyDesc,
-                    0, nullptr,
-                    0, nullptr,
+                    static_cast<uint32_t>(std::size(queueFamilyStructTypes)), queueFamilyStructTypes,
+                    static_cast<uint32_t>(std::size(blocks::baseline::queueFamilyDesc)), blocks::baseline::queueFamilyDesc,
                     static_cast<uint32_t>(std::size(formatStructTypes)), formatStructTypes,
                     static_cast<uint32_t>(std::size(blocks::baseline::formatDesc)), blocks::baseline::formatDesc,
                     blocks::baseline::chainerDesc,

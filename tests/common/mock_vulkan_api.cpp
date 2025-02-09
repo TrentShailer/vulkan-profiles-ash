@@ -67,11 +67,29 @@ extern "C"{
             VK_EXT_SHADER_ATOMIC_FLOAT_SPEC_VERSION
         };
 
+        struct VkExtensionProperties video_queue = {
+            VK_KHR_VIDEO_QUEUE_EXTENSION_NAME,
+            VK_KHR_VIDEO_QUEUE_SPEC_VERSION
+        };
 
-        *pPropertyCount = 2;
+        struct VkExtensionProperties video_decode_queue = {
+            VK_KHR_VIDEO_DECODE_QUEUE_EXTENSION_NAME,
+            VK_KHR_VIDEO_DECODE_QUEUE_SPEC_VERSION
+        };
+
+        struct VkExtensionProperties video_decode_av1 = {
+            VK_KHR_VIDEO_DECODE_AV1_EXTENSION_NAME,
+            VK_KHR_VIDEO_DECODE_AV1_SPEC_VERSION
+        };
+
+
+        *pPropertyCount = 5;
         if (pProperties != nullptr) {
             pProperties[0] = sync2;
             pProperties[1] = atomic_float;
+            pProperties[2] = video_queue;
+            pProperties[3] = video_decode_queue;
+            pProperties[4] = video_decode_av1;
         }
 
         return VK_SUCCESS;
@@ -237,36 +255,24 @@ extern "C"{
             return;
         }
 
-        pQueueFamilyProperties[0].queueFamilyProperties.queueFlags = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT | VK_QUEUE_TRANSFER_BIT;
-        pQueueFamilyProperties[0].queueFamilyProperties.queueCount = 1;
+        // Queue family 1
+        pQueueFamilyProperties[0].queueFamilyProperties.queueFlags = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT;
+        pQueueFamilyProperties[0].queueFamilyProperties.queueCount = 2;
         pQueueFamilyProperties[0].queueFamilyProperties.timestampValidBits = 64;
         pQueueFamilyProperties[0].queueFamilyProperties.minImageTransferGranularity = {1, 1, 1};
-        VkBaseOutStructure* next = reinterpret_cast<VkBaseOutStructure*>(pQueueFamilyProperties[0].pNext);
-        while (next != nullptr) {
-            switch (next->sType) {
-                case VK_STRUCTURE_TYPE_QUEUE_FAMILY_GLOBAL_PRIORITY_PROPERTIES_KHR:
-                    {
-                        VkQueueFamilyGlobalPriorityPropertiesKHR* prop = reinterpret_cast<VkQueueFamilyGlobalPriorityPropertiesKHR*>(next);
-                        prop->priorityCount = 1;
-                        prop->priorities[0] = VK_QUEUE_GLOBAL_PRIORITY_MEDIUM_KHR;
-                    }
-                    break;
-            }
-            next = reinterpret_cast<VkBaseOutStructure*>(next->pNext);
-        }
 
-        pQueueFamilyProperties[1].queueFamilyProperties.queueFlags = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT | VK_QUEUE_TRANSFER_BIT;
-        pQueueFamilyProperties[1].queueFamilyProperties.queueCount = 4;
-        pQueueFamilyProperties[1].queueFamilyProperties.timestampValidBits = 64;
+        // Queue family 2
+        pQueueFamilyProperties[1].queueFamilyProperties.queueFlags = VK_QUEUE_VIDEO_DECODE_BIT_KHR;
+        pQueueFamilyProperties[1].queueFamilyProperties.queueCount = 1;
+        pQueueFamilyProperties[1].queueFamilyProperties.timestampValidBits = 32;
         pQueueFamilyProperties[1].queueFamilyProperties.minImageTransferGranularity = {1, 1, 1};
         VkBaseOutStructure* next2 = reinterpret_cast<VkBaseOutStructure*>(pQueueFamilyProperties[1].pNext);
         while (next2 != nullptr) {
             switch (next2->sType) {
-                case VK_STRUCTURE_TYPE_QUEUE_FAMILY_GLOBAL_PRIORITY_PROPERTIES_KHR:
+                case VK_STRUCTURE_TYPE_QUEUE_FAMILY_VIDEO_PROPERTIES_KHR:
                     {
-                        VkQueueFamilyGlobalPriorityPropertiesKHR* prop = reinterpret_cast<VkQueueFamilyGlobalPriorityPropertiesKHR*>(next2);
-                        prop->priorityCount = 1;
-                        prop->priorities[0] = VK_QUEUE_GLOBAL_PRIORITY_HIGH_KHR;
+                        VkQueueFamilyVideoPropertiesKHR* prop = reinterpret_cast<VkQueueFamilyVideoPropertiesKHR*>(next2);
+                        prop->videoCodecOperations = VK_VIDEO_CODEC_OPERATION_DECODE_AV1_BIT_KHR;
                     }
                     break;
             }

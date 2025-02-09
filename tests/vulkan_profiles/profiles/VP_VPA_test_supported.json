@@ -4,7 +4,10 @@
         "baseline": {
             "extensions": {
                 "VK_EXT_debug_utils": 1,
-                "VK_KHR_synchronization2": 1
+                "VK_KHR_synchronization2": 1,
+                "VK_KHR_video_queue": 1,
+                "VK_KHR_video_decode_queue": 1,
+                "VK_KHR_video_decode_av1": 1
             },
             "features": {
                 "VkPhysicalDeviceFeatures": {
@@ -40,7 +43,31 @@
                         "VK_SHADER_STAGE_COMPUTE_BIT"
                     ]
                 }
-            }
+            },
+            "queueFamiliesProperties": [
+                {
+                    "VkQueueFamilyProperties": {
+                        "queueCount": 2,
+                        "queueFlags": [
+                            "VK_QUEUE_COMPUTE_BIT",
+                            "VK_QUEUE_GRAPHICS_BIT"
+                        ]
+                    }
+                },
+                {
+                    "VkQueueFamilyProperties": {
+                        "queueCount": 1,
+                        "queueFlags": [
+                            "VK_QUEUE_VIDEO_DECODE_BIT_KHR"
+                        ]
+                    },
+                    "VkQueueFamilyVideoPropertiesKHR": {
+                        "videoCodecOperations": [
+                            "VK_VIDEO_CODEC_OPERATION_DECODE_AV1_BIT_KHR"
+                        ]
+                    }
+                }
+            ]
         }
     },
     "profiles": {

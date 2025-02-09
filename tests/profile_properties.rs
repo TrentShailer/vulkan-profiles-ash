@@ -36,10 +36,24 @@ fn instance_extension_properties() {
 
 #[test]
 fn device_extension_properties() {
-    let expected_properties = [vk::ExtensionProperties::default()
-        .extension_name(khr::synchronization2::NAME)
-        .unwrap()
-        .spec_version(1)];
+    let expected_properties = [
+        vk::ExtensionProperties::default()
+            .extension_name(khr::synchronization2::NAME)
+            .unwrap()
+            .spec_version(1),
+        vk::ExtensionProperties::default()
+            .extension_name(khr::video_queue::NAME)
+            .unwrap()
+            .spec_version(1),
+        vk::ExtensionProperties::default()
+            .extension_name(khr::video_decode_queue::NAME)
+            .unwrap()
+            .spec_version(1),
+        vk::ExtensionProperties::default()
+            .extension_name(khr::video_decode_av1::NAME)
+            .unwrap()
+            .spec_version(1),
+    ];
 
     let profile = vp::ProfileProperties::default()
         .profile_name(SUPPORTED)
@@ -55,16 +69,14 @@ fn device_extension_properties() {
 
     assert_eq!(properties.len(), expected_properties.len());
 
-    for index in 0..expected_properties.len() {
-        let expected = expected_properties[index];
-        let property = properties[index];
-
+    for expected in expected_properties {
         assert!(
-            expected.extension_name == property.extension_name,
+            properties
+                .iter()
+                .any(|property| property.extension_name == expected.extension_name),
             "{:#?}",
-            property
-        );
-        assert!(expected.spec_version == property.spec_version);
+            expected
+        )
     }
 }
 
@@ -89,11 +101,12 @@ fn profile_features_s_types() {
 
     assert_eq!(s_types.len(), expected_s_types.len());
 
-    for index in 0..expected_s_types.len() {
-        let expected = expected_s_types[index];
-        let s_type = s_types[index];
-
-        assert!(expected == s_type, "{:#?}", s_type);
+    for expected in expected_s_types {
+        assert!(
+            s_types.iter().any(|&s_type| s_type == expected),
+            "{:#?}",
+            expected
+        )
     }
 }
 
@@ -139,11 +152,12 @@ fn profile_property_s_types() {
 
     assert_eq!(s_types.len(), expected_s_types.len());
 
-    for index in 0..expected_s_types.len() {
-        let expected = expected_s_types[index];
-        let s_type = s_types[index];
-
-        assert!(expected == s_type, "{:#?}", s_type);
+    for expected in expected_s_types {
+        assert!(
+            s_types.iter().any(|&s_type| s_type == expected),
+            "{:#?}",
+            expected
+        )
     }
 }
 
@@ -168,6 +182,153 @@ fn profile_properties() {
     assert!(subgroup
         .supported_stages
         .contains(vk::ShaderStageFlags::COMPUTE));
+}
+
+#[test]
+fn profile_queue_family_s_types() {
+    let expected_s_types = [
+        vk::StructureType::QUEUE_FAMILY_VIDEO_PROPERTIES_KHR,
+        vk::StructureType::QUEUE_FAMILY_PROPERTIES_2_KHR,
+    ];
+
+    let profile = vp::ProfileProperties::default()
+        .profile_name(SUPPORTED)
+        .unwrap();
+
+    let (_, _, capabilities) = setup();
+
+    let s_types = unsafe {
+        capabilities
+            .get_profile_queue_family_structure_types(&profile, None)
+            .unwrap()
+    };
+
+    assert_eq!(s_types.len(), expected_s_types.len(), "{:#?}", s_types);
+
+    for expected in expected_s_types {
+        assert!(
+            s_types.iter().any(|&s_type| s_type == expected),
+            "{:#?}",
+            expected
+        )
+    }
+}
+
+#[test]
+fn profile_queue_family_properties_count() {
+    let expected = 2;
+
+    let profile = vp::ProfileProperties::default()
+        .profile_name(SUPPORTED)
+        .unwrap();
+
+    let (_, _, capabilities) = setup();
+
+    let mut count = 0;
+    let result = unsafe {
+        capabilities.get_profile_queue_family_properties(&profile, None, &mut count, None)
+    };
+
+    assert!(result.is_ok());
+    assert_eq!(count, expected);
+}
+
+#[test]
+fn profile_queue_family_properties_incomplete() {
+    let expected = vk::QueueFamilyProperties::default()
+        .queue_count(2)
+        .queue_flags(vk::QueueFlags::COMPUTE | vk::QueueFlags::GRAPHICS);
+
+    let profile = vp::ProfileProperties::default()
+        .profile_name(SUPPORTED)
+        .unwrap();
+
+    let (_, _, capabilities) = setup();
+
+    let mut count = 1;
+    let mut properties = vk::QueueFamilyProperties2KHR::default();
+    let result = unsafe {
+        capabilities.get_profile_queue_family_properties(
+            &profile,
+            None,
+            &mut count,
+            Some(core::slice::from_mut(&mut properties)),
+        )
+    };
+
+    assert_eq!(result, Err(vk::Result::INCOMPLETE));
+    assert_eq!(
+        properties.queue_family_properties.queue_count,
+        expected.queue_count
+    );
+    assert_eq!(
+        properties.queue_family_properties.queue_flags,
+        expected.queue_flags
+    );
+}
+
+#[test]
+fn profile_queue_family_properties() {
+    let expected_0 = vk::QueueFamilyProperties2KHR::default().queue_family_properties(
+        vk::QueueFamilyProperties::default()
+            .queue_count(2)
+            .queue_flags(vk::QueueFlags::COMPUTE | vk::QueueFlags::GRAPHICS),
+    );
+
+    let mut expected_1_video = vk::QueueFamilyVideoPropertiesKHR::default()
+        .video_codec_operations(vk::VideoCodecOperationFlagsKHR::DECODE_AV1);
+    let expected_1 = vk::QueueFamilyProperties2KHR::default()
+        .queue_family_properties(
+            vk::QueueFamilyProperties::default()
+                .queue_count(1)
+                .queue_flags(vk::QueueFlags::VIDEO_DECODE_KHR),
+        )
+        .push_next(&mut expected_1_video);
+
+    let profile = vp::ProfileProperties::default()
+        .profile_name(SUPPORTED)
+        .unwrap();
+
+    let (_, _, capabilities) = setup();
+
+    // Setup properties
+    let mut count: u32 = 2;
+    let mut extra_properties: Vec<_> = (0..count)
+        .map(|_| vk::QueueFamilyVideoPropertiesKHR::default())
+        .collect();
+
+    let mut properties: Vec<_> = extra_properties
+        .iter_mut()
+        .map(|property| vk::QueueFamilyProperties2KHR::default().push_next(property))
+        .collect();
+
+    unsafe {
+        capabilities
+            .get_profile_queue_family_properties(&profile, None, &mut count, Some(&mut properties))
+            .unwrap()
+    };
+
+    assert_eq!(
+        properties[0].queue_family_properties.queue_count,
+        expected_0.queue_family_properties.queue_count
+    );
+    assert_eq!(
+        properties[0].queue_family_properties.queue_flags,
+        expected_0.queue_family_properties.queue_flags
+    );
+
+    assert_eq!(
+        properties[1].queue_family_properties.queue_count,
+        expected_1.queue_family_properties.queue_count
+    );
+    assert_eq!(
+        properties[1].queue_family_properties.queue_flags,
+        expected_1.queue_family_properties.queue_flags
+    );
+    assert_eq!(
+        extra_properties[1].video_codec_operations,
+        expected_1_video.video_codec_operations
+    );
 }
 
 #[test]
