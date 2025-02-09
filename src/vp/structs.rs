@@ -1,6 +1,7 @@
 use core::{
     ffi::{self, CStr, FromBytesUntilNulError},
     fmt,
+    marker::PhantomData,
 };
 
 use ash::{
@@ -255,21 +256,25 @@ pub struct VulkanFunctions {
 #[repr(C)]
 #[cfg_attr(feature = "debug", derive(Debug))]
 #[derive(Clone, Copy)]
-pub struct CapabilitiesCreateInfo {
+pub struct CapabilitiesCreateInfo<'a> {
     pub flags: CapabilitiesCreateFlags,
     pub api_version: u32,
     pub vulkan_functions: *const VulkanFunctions,
+    pub _marker: PhantomData<&'a ()>,
 }
-impl Default for CapabilitiesCreateInfo {
+
+impl Default for CapabilitiesCreateInfo<'_> {
     fn default() -> Self {
         Self {
             flags: Default::default(),
             api_version: Default::default(),
             vulkan_functions: core::ptr::null(),
+            _marker: PhantomData,
         }
     }
 }
-impl CapabilitiesCreateInfo {
+
+impl<'a> CapabilitiesCreateInfo<'a> {
     pub fn flags(mut self, flags: CapabilitiesCreateFlags) -> Self {
         self.flags = flags;
         self
@@ -280,7 +285,7 @@ impl CapabilitiesCreateInfo {
         self
     }
 
-    pub fn vulkan_functions(mut self, functions: &VulkanFunctions) -> Self {
+    pub fn vulkan_functions(mut self, functions: &'a VulkanFunctions) -> Self {
         self.vulkan_functions = functions;
         self
     }
