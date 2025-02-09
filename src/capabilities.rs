@@ -427,6 +427,50 @@ impl Capabilities {
             )
         })
     }
+
+    /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#query-profile-queue-family-properties>
+    pub unsafe fn get_profile_queue_family_properties(
+        &self,
+        profile_properties: &vp::ProfileProperties,
+        block_name: Option<&CStr>,
+    ) -> VkResult<Vec<vk::QueueFamilyProperties2KHR<'_>>> {
+        let block_name_ptr = match block_name {
+            Some(name) => name.as_ptr(),
+            None => core::ptr::null(),
+        };
+
+        read_into_uninitialized_vector(|count, data| {
+            (self.profiles_fn.get_profile_queue_family_properties)(
+                self.handle,
+                profile_properties,
+                block_name_ptr,
+                count,
+                data,
+            )
+        })
+    }
+
+    /// <https://vulkan.lunarg.com/doc/view/1.4.304.0/windows/profiles_api_library.html#query-profile-queue-family-properties>
+    pub unsafe fn get_profile_queue_family_structure_types(
+        &self,
+        profile_properties: &vp::ProfileProperties,
+        block_name: Option<&CStr>,
+    ) -> VkResult<Vec<vk::StructureType>> {
+        let block_name_ptr = match block_name {
+            Some(name) => name.as_ptr(),
+            None => core::ptr::null(),
+        };
+
+        read_into_uninitialized_vector(|count, data| {
+            (self.profiles_fn.get_profile_queue_family_structure_types)(
+                self.handle,
+                profile_properties,
+                block_name_ptr,
+                count,
+                data,
+            )
+        })
+    }
 }
 
 pub struct ProfilesFn {
@@ -452,6 +496,8 @@ pub struct ProfilesFn {
     pub get_profile_formats: vp::PFN_vpGetProfileFormats,
     pub get_profile_format_properties: vp::PFN_vpGetProfileFormatProperties,
     pub get_profile_format_structure_types: vp::PFN_vpGetProfileFormatStructureTypes,
+    pub get_profile_queue_family_properties: vp::PFN_vpGetProfileQueueFamilyProperties,
+    pub get_profile_queue_family_structure_types: vp::PFN_vpGetProfileQueueFamilyStructureTypes,
 }
 
 impl ProfilesFn {
@@ -480,6 +526,8 @@ impl ProfilesFn {
             get_profile_formats: vp::vpGetProfileFormats,
             get_profile_format_properties: vp::vpGetProfileFormatProperties,
             get_profile_format_structure_types: vp::vpGetProfileFormatStructureTypes,
+            get_profile_queue_family_properties: vp::vpGetProfileQueueFamilyProperties,
+            get_profile_queue_family_structure_types: vp::vpGetProfileQueueFamilyStructureTypes,
         }
     }
 }

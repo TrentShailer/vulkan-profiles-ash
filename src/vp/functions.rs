@@ -190,6 +190,24 @@ pub type PFN_vpGetProfileFormatStructureTypes = unsafe extern "system" fn(
     pStructureTypes: *mut vk::StructureType,
 ) -> vk::Result;
 
+#[allow(non_camel_case_types)]
+pub type PFN_vpGetProfileQueueFamilyProperties = unsafe extern "system" fn(
+    capabilities: Capabilities,
+    pProfile: *const ProfileProperties,
+    pBlockName: *const ffi::c_char,
+    pPropertyCount: *mut u32,
+    pProperties: *mut vk::QueueFamilyProperties2KHR<'_>,
+) -> vk::Result;
+
+#[allow(non_camel_case_types)]
+pub type PFN_vpGetProfileQueueFamilyStructureTypes = unsafe extern "system" fn(
+    capabilities: Capabilities,
+    pProfile: *const ProfileProperties,
+    pBlockName: *const ffi::c_char,
+    pStructureTypeCount: *mut u32,
+    pStructureTypes: *mut vk::StructureType,
+) -> vk::Result;
+
 extern "system" {
     pub(crate) fn vpCreateCapabilities(
         pCreateInfo: *const CapabilitiesCreateInfo,
@@ -345,6 +363,22 @@ extern "system" {
     ) -> vk::Result;
 
     pub(crate) fn vpGetProfileFormatStructureTypes(
+        capabilities: Capabilities,
+        pProfile: *const ProfileProperties,
+        pBlockName: *const ffi::c_char,
+        pStructureTypeCount: *mut u32,
+        pStructureTypes: *mut vk::StructureType,
+    ) -> vk::Result;
+
+    pub(crate) fn vpGetProfileQueueFamilyProperties(
+        capabilities: Capabilities,
+        pProfile: *const ProfileProperties,
+        pBlockName: *const ffi::c_char,
+        pPropertyCount: *mut u32,
+        pProperties: *mut vk::QueueFamilyProperties2KHR<'_>,
+    ) -> vk::Result;
+
+    pub(crate) fn vpGetProfileQueueFamilyStructureTypes(
         capabilities: Capabilities,
         pProfile: *const ProfileProperties,
         pBlockName: *const ffi::c_char,
