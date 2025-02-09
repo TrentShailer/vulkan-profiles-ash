@@ -11,13 +11,13 @@ pub struct Entry {
 impl Entry {
     pub fn linked() -> Self {
         Self {
-            entry_fn: EntryFn::load_static(),
+            entry_fn: EntryFn::linked(),
         }
     }
 
     pub unsafe fn create_capabilities(
         &self,
-        capabilities_create_info: &vp::CapabilitiesCreateInfo,
+        capabilities_create_info: &vp::CapabilitiesCreateInfo<'_>,
         allocation_callbacks: Option<&vk::AllocationCallbacks<'_>>,
     ) -> VkResult<crate::Capabilities> {
         let mut handle = mem::MaybeUninit::uninit();
@@ -28,7 +28,7 @@ impl Entry {
         )
         .assume_init_on_success(handle)?;
 
-        Ok(crate::Capabilities::load(handle))
+        Ok(crate::Capabilities::linked(handle))
     }
 }
 
@@ -36,9 +36,9 @@ pub struct EntryFn {
     pub create_capabilities: vp::PFN_vpCreateCapabilities,
 }
 impl EntryFn {
-    pub fn load_static() -> Self {
+    pub fn linked() -> Self {
         Self {
-            create_capabilities: vp::vpCreateCapabilities,
+            create_capabilities: vp::linked::vpCreateCapabilities,
         }
     }
 }

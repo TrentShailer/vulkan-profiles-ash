@@ -19,6 +19,7 @@ pub struct ProfileProperties {
     pub profile_name: [ffi::c_char; VP_MAX_PROFILE_NAME_SIZE],
     pub spec_version: u32,
 }
+
 impl Default for ProfileProperties {
     fn default() -> Self {
         Self {
@@ -27,6 +28,7 @@ impl Default for ProfileProperties {
         }
     }
 }
+
 impl ProfileProperties {
     pub fn profile_name(mut self, name: &CStr) -> Result<Self, CStrTooLargeForStaticArray> {
         write_c_str_slice_with_nul(self.profile_name.as_mut_slice(), name)?;
@@ -42,6 +44,7 @@ impl ProfileProperties {
         wrap_c_str_slice_until_nul(&self.profile_name)
     }
 }
+
 #[cfg(feature = "debug")]
 impl fmt::Debug for ProfileProperties {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -62,6 +65,7 @@ pub struct BlockProperties {
     pub api_version: u32,
     pub block_name: [ffi::c_char; VP_MAX_PROFILE_NAME_SIZE],
 }
+
 impl Default for BlockProperties {
     fn default() -> Self {
         Self {
@@ -71,6 +75,7 @@ impl Default for BlockProperties {
         }
     }
 }
+
 impl BlockProperties {
     pub fn profiles(mut self, profiles: ProfileProperties) -> Self {
         self.profiles = profiles;
@@ -91,6 +96,7 @@ impl BlockProperties {
         wrap_c_str_slice_until_nul(&self.block_name)
     }
 }
+
 #[cfg(feature = "debug")]
 impl fmt::Debug for BlockProperties {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -123,6 +129,7 @@ pub struct InstanceCreateInfo<'a> {
     pub enabled_profile_block_count: u32,
     pub p_enabled_profile_blocks: *const BlockProperties,
 }
+
 impl Default for InstanceCreateInfo<'_> {
     fn default() -> Self {
         Self {
@@ -135,6 +142,7 @@ impl Default for InstanceCreateInfo<'_> {
         }
     }
 }
+
 impl<'a> InstanceCreateInfo<'a> {
     pub fn create_info(mut self, create_info: &'a vk::InstanceCreateInfo<'_>) -> Self {
         self.p_create_info = create_info;
@@ -178,6 +186,7 @@ pub struct DeviceCreateInfo<'a> {
     pub enabled_profile_block_count: u32,
     pub p_enabled_profile_blocks: *const BlockProperties,
 }
+
 impl Default for DeviceCreateInfo<'_> {
     fn default() -> Self {
         Self {
@@ -190,6 +199,7 @@ impl Default for DeviceCreateInfo<'_> {
         }
     }
 }
+
 impl<'a> DeviceCreateInfo<'a> {
     pub fn create_info(mut self, create_info: &'a vk::DeviceCreateInfo<'_>) -> Self {
         self.p_create_info = create_info;

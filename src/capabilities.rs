@@ -9,15 +9,17 @@ use crate::{
     vp,
 };
 
+#[derive(Clone)]
 pub struct Capabilities {
     handle: vp::Capabilities,
-    profiles_fn: ProfilesFn,
+    fp: CapabilitiesFn,
 }
+
 impl Capabilities {
-    pub fn load(handle: vp::Capabilities) -> Self {
+    pub fn linked(handle: vp::Capabilities) -> Self {
         Self {
             handle,
-            profiles_fn: ProfilesFn::load_static(),
+            fp: CapabilitiesFn::linked(),
         }
     }
 
@@ -26,21 +28,21 @@ impl Capabilities {
     }
 
     /// Returns the raw function pointer table
-    pub fn profiles_fn(&self) -> &ProfilesFn {
-        &self.profiles_fn
+    pub fn fp(&self) -> &CapabilitiesFn {
+        &self.fp
     }
 
     pub unsafe fn destroy_capabilities(
         &self,
         allocation_callbacks: Option<&vk::AllocationCallbacks<'_>>,
     ) {
-        (self.profiles_fn.destroy_capabilities)(self.handle, allocation_callbacks.as_raw_ptr());
+        (self.fp.destroy_capabilities)(self.handle, allocation_callbacks.as_raw_ptr());
     }
 
     /// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#query-profiles>
     pub unsafe fn get_profiles(&self) -> VkResult<Vec<vp::ProfileProperties>> {
         read_into_uninitialized_vector(|count, data| {
-            (self.profiles_fn.get_profiles)(self.handle, count, data)
+            (self.fp.get_profiles)(self.handle, count, data)
         })
     }
 
@@ -50,12 +52,7 @@ impl Capabilities {
         profile_properties: &vp::ProfileProperties,
     ) -> VkResult<Vec<vp::ProfileProperties>> {
         read_into_uninitialized_vector(|count, data| {
-            (self.profiles_fn.get_profile_required_profiles)(
-                self.handle,
-                profile_properties,
-                count,
-                data,
-            )
+            (self.fp.get_profile_required_profiles)(self.handle, profile_properties, count, data)
         })
     }
 
@@ -64,7 +61,7 @@ impl Capabilities {
         &self,
         profile_properties: &vp::ProfileProperties,
     ) -> u32 {
-        (self.profiles_fn.get_profile_api_version)(self.handle, profile_properties)
+        (self.fp.get_profile_api_version)(self.handle, profile_properties)
     }
 
     /// <https://vulkan.lunarg.com/doc/view/1.3.296.0/windows/profiles_api_library.html#query-profile-fallbacks>
@@ -73,7 +70,7 @@ impl Capabilities {
         profile_properties: &vp::ProfileProperties,
     ) -> VkResult<Vec<vp::ProfileProperties>> {
         read_into_uninitialized_vector(|count, data| {
-            (self.profiles_fn.get_profile_fallbacks)(self.handle, profile_properties, count, data)
+            (self.fp.get_profile_fallbacks)(self.handle, profile_properties, count, data)
         })
     }
 
@@ -83,7 +80,7 @@ impl Capabilities {
         profile_properties: &vp::ProfileProperties,
     ) -> VkResult<bool> {
         let mut has_multiple_variants = vk::FALSE;
-        (self.profiles_fn.has_multiple_variants_profile)(
+        (self.fp.has_multiple_variants_profile)(
             self.handle,
             profile_properties,
             &mut has_multiple_variants,
@@ -105,7 +102,7 @@ impl Capabilities {
         };
 
         let mut supported = vk::FALSE;
-        (self.profiles_fn.get_instance_profile_support)(
+        (self.fp.get_instance_profile_support)(
             self.handle,
             layer_name_ptr,
             profile_properties,
@@ -129,7 +126,7 @@ impl Capabilities {
 
         let mut supported = vk::FALSE;
         let blocks = read_into_uninitialized_vector_mut(|count, data| {
-            (self.profiles_fn.get_instance_profile_variants_support)(
+            (self.fp.get_instance_profile_variants_support)(
                 self.handle,
                 layer_name_ptr,
                 profile_properties,
@@ -154,7 +151,7 @@ impl Capabilities {
         allocation_callbacks: Option<&vk::AllocationCallbacks<'_>>,
     ) -> VkResult<ash::Instance> {
         let mut instance = core::mem::zeroed();
-        (self.profiles_fn.create_instance)(
+        (self.fp.create_instance)(
             self.handle,
             instance_create_info,
             allocation_callbacks.as_raw_ptr(),
@@ -172,7 +169,7 @@ impl Capabilities {
         profile_properties: &vp::ProfileProperties,
     ) -> VkResult<bool> {
         let mut supported = vk::FALSE;
-        (self.profiles_fn.get_physical_device_profile_support)(
+        (self.fp.get_physical_device_profile_support)(
             self.handle,
             instance.handle(),
             physical_device,
@@ -192,9 +189,7 @@ impl Capabilities {
     ) -> VkResult<(bool, Vec<vp::BlockProperties>)> {
         let mut supported = vk::FALSE;
         let blocks = read_into_uninitialized_vector_mut(|count, data| {
-            (self
-                .profiles_fn
-                .get_physical_device_profile_variants_support)(
+            (self.fp.get_physical_device_profile_variants_support)(
                 self.handle,
                 instance.handle(),
                 physical_device,
@@ -220,7 +215,7 @@ impl Capabilities {
         allocation_callbacks: Option<&vk::AllocationCallbacks<'_>>,
     ) -> VkResult<ash::Device> {
         let mut device = vk::Device::null();
-        (self.profiles_fn.create_device)(
+        (self.fp.create_device)(
             self.handle,
             physical_device,
             device_create_info,
@@ -243,7 +238,7 @@ impl Capabilities {
         };
 
         read_into_uninitialized_vector(|count, data| {
-            (self.profiles_fn.get_profile_instance_extension_properties)(
+            (self.fp.get_profile_instance_extension_properties)(
                 self.handle,
                 profile_properties,
                 block_name_ptr,
@@ -265,7 +260,7 @@ impl Capabilities {
         };
 
         read_into_uninitialized_vector(|count, data| {
-            (self.profiles_fn.get_profile_device_extension_properties)(
+            (self.fp.get_profile_device_extension_properties)(
                 self.handle,
                 profile_properties,
                 block_name_ptr,
@@ -287,7 +282,7 @@ impl Capabilities {
             None => core::ptr::null(),
         };
 
-        (self.profiles_fn.get_profile_features)(
+        (self.fp.get_profile_features)(
             self.handle,
             profile_properties,
             block_name_ptr,
@@ -308,7 +303,7 @@ impl Capabilities {
         };
 
         read_into_uninitialized_vector(|count, data| {
-            (self.profiles_fn.get_profile_feature_structure_types)(
+            (self.fp.get_profile_feature_structure_types)(
                 self.handle,
                 profile_properties,
                 block_name_ptr,
@@ -330,7 +325,7 @@ impl Capabilities {
             None => core::ptr::null(),
         };
 
-        (self.profiles_fn.get_profile_properties)(
+        (self.fp.get_profile_properties)(
             self.handle,
             profile_properties,
             block_name_ptr,
@@ -351,7 +346,7 @@ impl Capabilities {
         };
 
         read_into_uninitialized_vector(|count, data| {
-            (self.profiles_fn.get_profile_property_structure_types)(
+            (self.fp.get_profile_property_structure_types)(
                 self.handle,
                 profile_properties,
                 block_name_ptr,
@@ -373,7 +368,7 @@ impl Capabilities {
         };
 
         read_into_uninitialized_vector(|count, data| {
-            (self.profiles_fn.get_profile_formats)(
+            (self.fp.get_profile_formats)(
                 self.handle,
                 profile_properties,
                 block_name_ptr,
@@ -396,7 +391,7 @@ impl Capabilities {
             None => core::ptr::null(),
         };
 
-        (self.profiles_fn.get_profile_format_properties)(
+        (self.fp.get_profile_format_properties)(
             self.handle,
             profile_properties,
             block_name_ptr,
@@ -418,7 +413,7 @@ impl Capabilities {
         };
 
         read_into_uninitialized_vector(|count, data| {
-            (self.profiles_fn.get_profile_format_structure_types)(
+            (self.fp.get_profile_format_structure_types)(
                 self.handle,
                 profile_properties,
                 block_name_ptr,
@@ -440,7 +435,7 @@ impl Capabilities {
         };
 
         read_into_uninitialized_vector(|count, data| {
-            (self.profiles_fn.get_profile_queue_family_properties)(
+            (self.fp.get_profile_queue_family_properties)(
                 self.handle,
                 profile_properties,
                 block_name_ptr,
@@ -462,7 +457,7 @@ impl Capabilities {
         };
 
         read_into_uninitialized_vector(|count, data| {
-            (self.profiles_fn.get_profile_queue_family_structure_types)(
+            (self.fp.get_profile_queue_family_structure_types)(
                 self.handle,
                 profile_properties,
                 block_name_ptr,
@@ -473,7 +468,8 @@ impl Capabilities {
     }
 }
 
-pub struct ProfilesFn {
+#[derive(Clone)]
+pub struct CapabilitiesFn {
     pub destroy_capabilities: vp::PFN_vpDestroyCapabilities,
     pub get_profiles: vp::PFN_vpGetProfiles,
     pub get_profile_required_profiles: vp::PFN_vpGetProfileRequiredProfiles,
@@ -500,34 +496,37 @@ pub struct ProfilesFn {
     pub get_profile_queue_family_structure_types: vp::PFN_vpGetProfileQueueFamilyStructureTypes,
 }
 
-impl ProfilesFn {
+impl CapabilitiesFn {
     /// Initializes the table from the statically linked library
-    pub(crate) fn load_static() -> Self {
+    pub(crate) fn linked() -> Self {
         Self {
-            destroy_capabilities: vp::vpDestroyCapabilities,
-            get_profiles: vp::vpGetProfiles,
-            get_profile_required_profiles: vp::vpGetProfileRequiredProfiles,
-            get_profile_api_version: vp::vpGetProfileAPIVersion,
-            get_profile_fallbacks: vp::vpGetProfileFallbacks,
-            has_multiple_variants_profile: vp::vpHasMultipleVariantsProfile,
-            get_instance_profile_support: vp::vpGetInstanceProfileSupport,
-            get_instance_profile_variants_support: vp::vpGetInstanceProfileVariantsSupport,
-            create_instance: vp::vpCreateInstance,
-            get_physical_device_profile_support: vp::vpGetPhysicalDeviceProfileSupport,
+            destroy_capabilities: vp::linked::vpDestroyCapabilities,
+            get_profiles: vp::linked::vpGetProfiles,
+            get_profile_required_profiles: vp::linked::vpGetProfileRequiredProfiles,
+            get_profile_api_version: vp::linked::vpGetProfileAPIVersion,
+            get_profile_fallbacks: vp::linked::vpGetProfileFallbacks,
+            has_multiple_variants_profile: vp::linked::vpHasMultipleVariantsProfile,
+            get_instance_profile_support: vp::linked::vpGetInstanceProfileSupport,
+            get_instance_profile_variants_support: vp::linked::vpGetInstanceProfileVariantsSupport,
+            create_instance: vp::linked::vpCreateInstance,
+            get_physical_device_profile_support: vp::linked::vpGetPhysicalDeviceProfileSupport,
             get_physical_device_profile_variants_support:
-                vp::vpGetPhysicalDeviceProfileVariantsSupport,
-            create_device: vp::vpCreateDevice,
-            get_profile_instance_extension_properties: vp::vpGetProfileInstanceExtensionProperties,
-            get_profile_device_extension_properties: vp::vpGetProfileDeviceExtensionProperties,
-            get_profile_features: vp::vpGetProfileFeatures,
-            get_profile_feature_structure_types: vp::vpGetProfileFeatureStructureTypes,
-            get_profile_properties: vp::vpGetProfileProperties,
-            get_profile_property_structure_types: vp::vpGetProfilePropertyStructureTypes,
-            get_profile_formats: vp::vpGetProfileFormats,
-            get_profile_format_properties: vp::vpGetProfileFormatProperties,
-            get_profile_format_structure_types: vp::vpGetProfileFormatStructureTypes,
-            get_profile_queue_family_properties: vp::vpGetProfileQueueFamilyProperties,
-            get_profile_queue_family_structure_types: vp::vpGetProfileQueueFamilyStructureTypes,
+                vp::linked::vpGetPhysicalDeviceProfileVariantsSupport,
+            create_device: vp::linked::vpCreateDevice,
+            get_profile_instance_extension_properties:
+                vp::linked::vpGetProfileInstanceExtensionProperties,
+            get_profile_device_extension_properties:
+                vp::linked::vpGetProfileDeviceExtensionProperties,
+            get_profile_features: vp::linked::vpGetProfileFeatures,
+            get_profile_feature_structure_types: vp::linked::vpGetProfileFeatureStructureTypes,
+            get_profile_properties: vp::linked::vpGetProfileProperties,
+            get_profile_property_structure_types: vp::linked::vpGetProfilePropertyStructureTypes,
+            get_profile_formats: vp::linked::vpGetProfileFormats,
+            get_profile_format_properties: vp::linked::vpGetProfileFormatProperties,
+            get_profile_format_structure_types: vp::linked::vpGetProfileFormatStructureTypes,
+            get_profile_queue_family_properties: vp::linked::vpGetProfileQueueFamilyProperties,
+            get_profile_queue_family_structure_types:
+                vp::linked::vpGetProfileQueueFamilyStructureTypes,
         }
     }
 }
