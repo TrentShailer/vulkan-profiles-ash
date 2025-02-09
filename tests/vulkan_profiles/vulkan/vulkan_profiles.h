@@ -52,7 +52,7 @@
     defined(VK_KHR_video_queue)
 #define VP_VPA_test_supported 1
 #define VP_VPA_TEST_SUPPORTED_NAME "VP_VPA_test_supported"
-#define VP_VPA_TEST_SUPPORTED_SPEC_VERSION 1
+#define VP_VPA_TEST_SUPPORTED_SPEC_VERSION 2
 #define VP_VPA_TEST_SUPPORTED_MIN_API_VERSION VK_MAKE_VERSION(1, 2, 0)
 #endif
 
@@ -102,6 +102,16 @@
 #define VP_VPA_TEST_VARIANTS_SUPPORTED_NAME "VP_VPA_test_variants_supported"
 #define VP_VPA_TEST_VARIANTS_SUPPORTED_SPEC_VERSION 1
 #define VP_VPA_TEST_VARIANTS_SUPPORTED_MIN_API_VERSION VK_MAKE_VERSION(1, 2, 0)
+#endif
+
+#if defined(VK_VERSION_1_2) && \
+    defined(VK_KHR_video_decode_h264) && \
+    defined(VK_KHR_video_decode_queue) && \
+    defined(VK_KHR_video_queue)
+#define VP_VPA_test_video 1
+#define VP_VPA_TEST_VIDEO_NAME "VP_VPA_test_video"
+#define VP_VPA_TEST_VIDEO_SPEC_VERSION 1
+#define VP_VPA_TEST_VIDEO_MIN_API_VERSION VK_MAKE_VERSION(1, 2, 0)
 #endif
 
 #define VP_HEADER_VERSION_COMPLETE VK_MAKE_API_VERSION(0, 2, 0, VK_HEADER_VERSION)

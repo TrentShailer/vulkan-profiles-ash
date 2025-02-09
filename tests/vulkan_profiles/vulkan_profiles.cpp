@@ -1681,6 +1681,319 @@ static const VpStructChainerDesc chainerDesc = {
 } // namespace VP_VPA_TEST_VARIANTS_SUPPORTED
 #endif // VP_VPA_test_variants_supported
 
+#ifdef VP_VPA_test_video
+namespace VP_VPA_TEST_VIDEO {
+
+static const VkStructureType queueFamilyStructTypes[] = {
+    VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2_KHR,
+    VK_STRUCTURE_TYPE_QUEUE_FAMILY_VIDEO_PROPERTIES_KHR,
+};
+
+static const VkExtensionProperties deviceExtensions[] = {
+    VkExtensionProperties{ VK_KHR_VIDEO_DECODE_H264_EXTENSION_NAME, 1 },
+    VkExtensionProperties{ VK_KHR_VIDEO_DECODE_QUEUE_EXTENSION_NAME, 1 },
+    VkExtensionProperties{ VK_KHR_VIDEO_QUEUE_EXTENSION_NAME, 1 },
+};
+
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](uint32_t count, VkBaseOutStructure* p, void* pUser, PFN_vpStructArrayChainerCb pfnCb) {
+        struct ExtStructs {
+            VkQueueFamilyVideoPropertiesKHR queueFamilyVideoPropertiesKHR;
+        };
+        std::vector<ExtStructs> ext_structs{};
+        if (count > 0) {
+            ext_structs.resize(count);
+            VkQueueFamilyProperties2KHR* pArray = static_cast<VkQueueFamilyProperties2KHR*>(static_cast<void*>(p));
+            for (uint32_t i = 0; i < count; ++i) {
+                ext_structs[i].queueFamilyVideoPropertiesKHR = VkQueueFamilyVideoPropertiesKHR{ VK_STRUCTURE_TYPE_QUEUE_FAMILY_VIDEO_PROPERTIES_KHR, nullptr };
+                pArray[i].pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&ext_structs[i].queueFamilyVideoPropertiesKHR));
+            }
+        }
+        pfnCb(count, p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+};
+
+namespace blocks {
+namespace baseline {
+
+static const VkExtensionProperties deviceExtensions[] = {
+    VkExtensionProperties{ VK_KHR_VIDEO_DECODE_H264_EXTENSION_NAME, 1 },
+    VkExtensionProperties{ VK_KHR_VIDEO_DECODE_QUEUE_EXTENSION_NAME, 1 },
+    VkExtensionProperties{ VK_KHR_VIDEO_QUEUE_EXTENSION_NAME, 1 },
+};
+
+static const VpFeatureDesc featureDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpPropertyDesc propertyDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+        return ret;
+    }
+};
+
+static const VpQueueFamilyDesc queueFamilyDesc[] = {
+    {
+        [](VkBaseOutStructure* p) { (void)p;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2_KHR: {
+                    VkQueueFamilyProperties2KHR* s = static_cast<VkQueueFamilyProperties2KHR*>(static_cast<void*>(p));
+                    s->queueFamilyProperties.queueCount = 1;
+                    s->queueFamilyProperties.queueFlags |= (VK_QUEUE_VIDEO_DECODE_BIT_KHR);
+                } break;
+                case VK_STRUCTURE_TYPE_QUEUE_FAMILY_VIDEO_PROPERTIES_KHR: {
+                    VkQueueFamilyVideoPropertiesKHR* s = static_cast<VkQueueFamilyVideoPropertiesKHR*>(static_cast<void*>(p));
+                    s->videoCodecOperations |= (VK_VIDEO_CODEC_OPERATION_DECODE_H264_BIT_KHR);
+                } break;
+                default: break;
+            }
+        },
+        [](VkBaseOutStructure* p) -> bool { (void)p;
+            bool ret = true;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2_KHR: {
+                    VkQueueFamilyProperties2KHR* s = static_cast<VkQueueFamilyProperties2KHR*>(static_cast<void*>(p));
+                    ret = ret && (s->queueFamilyProperties.queueCount >= 1);
+                    ret = ret && (vpCheckFlags(s->queueFamilyProperties.queueFlags, (VK_QUEUE_VIDEO_DECODE_BIT_KHR)));
+                } break;
+                case VK_STRUCTURE_TYPE_QUEUE_FAMILY_VIDEO_PROPERTIES_KHR: {
+                    VkQueueFamilyVideoPropertiesKHR* s = static_cast<VkQueueFamilyVideoPropertiesKHR*>(static_cast<void*>(p));
+                    ret = ret && (vpCheckFlags(s->videoCodecOperations, (VK_VIDEO_CODEC_OPERATION_DECODE_H264_BIT_KHR)));
+                } break;
+                default: break;
+            }
+            return ret;
+        }
+    },
+};
+
+static const VpStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+    [](uint32_t count, VkBaseOutStructure* p, void* pUser, PFN_vpStructArrayChainerCb pfnCb) {
+        struct ExtStructs {
+            VkQueueFamilyVideoPropertiesKHR queueFamilyVideoPropertiesKHR;
+        };
+        std::vector<ExtStructs> ext_structs{};
+        if (count > 0) {
+            ext_structs.resize(count);
+            VkQueueFamilyProperties2KHR* pArray = static_cast<VkQueueFamilyProperties2KHR*>(static_cast<void*>(p));
+            for (uint32_t i = 0; i < count; ++i) {
+                ext_structs[i].queueFamilyVideoPropertiesKHR = VkQueueFamilyVideoPropertiesKHR{ VK_STRUCTURE_TYPE_QUEUE_FAMILY_VIDEO_PROPERTIES_KHR, nullptr };
+                pArray[i].pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&ext_structs[i].queueFamilyVideoPropertiesKHR));
+            }
+        }
+        pfnCb(count, p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        pfnCb(p, pUser);
+    },
+};
+
+namespace video_profile_1 {
+
+static const VkStructureType infoStructTypes[] = {
+    VK_STRUCTURE_TYPE_VIDEO_PROFILE_INFO_KHR,
+    VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_PROFILE_INFO_KHR,
+};
+
+static const VkStructureType capabilityStructTypes[] = {
+    VK_STRUCTURE_TYPE_VIDEO_CAPABILITIES_KHR,
+    VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_CAPABILITIES_KHR,
+};
+
+static const VkStructureType formatStructTypes[] = {
+    VK_STRUCTURE_TYPE_VIDEO_FORMAT_PROPERTIES_KHR,
+};
+
+static const VpVideoProfileInfoDesc infoDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_VIDEO_PROFILE_INFO_KHR: {
+                    VkVideoProfileInfoKHR* s = static_cast<VkVideoProfileInfoKHR*>(static_cast<void*>(p));
+                    s->chromaBitDepth |= (VK_VIDEO_COMPONENT_BIT_DEPTH_8_BIT_KHR);
+                    s->chromaSubsampling |= (VK_VIDEO_CHROMA_SUBSAMPLING_420_BIT_KHR);
+                    s->lumaBitDepth |= (VK_VIDEO_COMPONENT_BIT_DEPTH_8_BIT_KHR);
+                    s->videoCodecOperation = VK_VIDEO_CODEC_OPERATION_DECODE_H264_BIT_KHR;
+                } break;
+                case VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_PROFILE_INFO_KHR: {
+                    VkVideoDecodeH264ProfileInfoKHR* s = static_cast<VkVideoDecodeH264ProfileInfoKHR*>(static_cast<void*>(p));
+                    s->pictureLayout = VK_VIDEO_DECODE_H264_PICTURE_LAYOUT_PROGRESSIVE_KHR;
+                    s->stdProfileIdc = STD_VIDEO_H264_PROFILE_IDC_MAIN;
+                } break;
+                default: break;
+            }
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_VIDEO_PROFILE_INFO_KHR: {
+                    VkVideoProfileInfoKHR* s = static_cast<VkVideoProfileInfoKHR*>(static_cast<void*>(p));
+                    ret = ret && (s->chromaBitDepth == (VK_VIDEO_COMPONENT_BIT_DEPTH_8_BIT_KHR));
+                    ret = ret && (s->chromaSubsampling == (VK_VIDEO_CHROMA_SUBSAMPLING_420_BIT_KHR));
+                    ret = ret && (s->lumaBitDepth == (VK_VIDEO_COMPONENT_BIT_DEPTH_8_BIT_KHR));
+                    ret = ret && (s->videoCodecOperation == VK_VIDEO_CODEC_OPERATION_DECODE_H264_BIT_KHR);
+                } break;
+                case VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_PROFILE_INFO_KHR: {
+                    VkVideoDecodeH264ProfileInfoKHR* s = static_cast<VkVideoDecodeH264ProfileInfoKHR*>(static_cast<void*>(p));
+                    ret = ret && (s->pictureLayout == VK_VIDEO_DECODE_H264_PICTURE_LAYOUT_PROGRESSIVE_KHR);
+                    ret = ret && (s->stdProfileIdc == STD_VIDEO_H264_PROFILE_IDC_MAIN);
+                } break;
+                default: break;
+            }
+        return ret;
+    }
+};
+
+static const VpVideoCapabilityDesc capabilityDesc = {
+    [](VkBaseOutStructure* p) { (void)p;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_VIDEO_CAPABILITIES_KHR: {
+                    VkVideoCapabilitiesKHR* s = static_cast<VkVideoCapabilitiesKHR*>(static_cast<void*>(p));
+                    s->maxActiveReferencePictures = 16;
+                    s->maxCodedExtent.height = 1080;
+                    s->maxCodedExtent.width = 1920;
+                    s->maxDpbSlots = 17;
+                } break;
+                case VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_CAPABILITIES_KHR: {
+                    VkVideoDecodeH264CapabilitiesKHR* s = static_cast<VkVideoDecodeH264CapabilitiesKHR*>(static_cast<void*>(p));
+                    s->maxLevelIdc = STD_VIDEO_H264_LEVEL_IDC_5_2;
+                } break;
+                default: break;
+            }
+    },
+    [](VkBaseOutStructure* p) -> bool { (void)p;
+        bool ret = true;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_VIDEO_CAPABILITIES_KHR: {
+                    VkVideoCapabilitiesKHR* s = static_cast<VkVideoCapabilitiesKHR*>(static_cast<void*>(p));
+                    ret = ret && (s->maxActiveReferencePictures >= 16);
+                    ret = ret && (s->maxCodedExtent.height >= 1080);
+                    ret = ret && (s->maxCodedExtent.width >= 1920);
+                    ret = ret && (s->maxDpbSlots >= 17);
+                } break;
+                case VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_CAPABILITIES_KHR: {
+                    VkVideoDecodeH264CapabilitiesKHR* s = static_cast<VkVideoDecodeH264CapabilitiesKHR*>(static_cast<void*>(p));
+                    ret = ret && (s->maxLevelIdc >= STD_VIDEO_H264_LEVEL_IDC_5_2);
+                } break;
+                default: break;
+            }
+        return ret;
+    }
+};
+
+static const VpVideoFormatDesc formatDesc[] = {
+    {
+        [](VkBaseOutStructure* p) { (void)p;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_VIDEO_FORMAT_PROPERTIES_KHR: {
+                    VkVideoFormatPropertiesKHR* s = static_cast<VkVideoFormatPropertiesKHR*>(static_cast<void*>(p));
+                    s->format = VK_FORMAT_G8_B8R8_2PLANE_420_UNORM;
+                    s->imageType = VK_IMAGE_TYPE_2D;
+                    s->imageUsageFlags |= (VK_IMAGE_USAGE_VIDEO_DECODE_DPB_BIT_KHR);
+                } break;
+                default: break;
+            }
+        },
+        [](VkBaseOutStructure* p) -> bool { (void)p;
+            bool ret = true;
+            switch (p->sType) {
+                case VK_STRUCTURE_TYPE_VIDEO_FORMAT_PROPERTIES_KHR: {
+                    VkVideoFormatPropertiesKHR* s = static_cast<VkVideoFormatPropertiesKHR*>(static_cast<void*>(p));
+                    ret = ret && (s->format == VK_FORMAT_G8_B8R8_2PLANE_420_UNORM);
+                    ret = ret && (s->imageType == VK_IMAGE_TYPE_2D);
+                    ret = ret && (vpCheckFlags(s->imageUsageFlags, (VK_IMAGE_USAGE_VIDEO_DECODE_DPB_BIT_KHR)));
+                } break;
+                default: break;
+            }
+            return ret;
+        }
+    },
+};
+
+static const VpVideoProfileStructChainerDesc chainerDesc = {
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        VkVideoDecodeH264ProfileInfoKHR videoDecodeH264ProfileInfoKHR{ VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_PROFILE_INFO_KHR, nullptr };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&videoDecodeH264ProfileInfoKHR));
+        pfnCb(p, pUser);
+    },
+    [](VkBaseOutStructure* p, void* pUser, PFN_vpStructChainerCb pfnCb) {
+        VkVideoDecodeH264CapabilitiesKHR videoDecodeH264CapabilitiesKHR{ VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_CAPABILITIES_KHR, nullptr };
+        p->pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(&videoDecodeH264CapabilitiesKHR));
+        pfnCb(p, pUser);
+    },
+    [](uint32_t count, VkBaseOutStructure* p, void* pUser, PFN_vpStructArrayChainerCb pfnCb) {
+        struct ExtStructs {
+        };
+        std::vector<ExtStructs> ext_structs{};
+        if (count > 0) {
+            ext_structs.resize(count);
+            VkVideoFormatPropertiesKHR* pArray = static_cast<VkVideoFormatPropertiesKHR*>(static_cast<void*>(p));
+            for (uint32_t i = 0; i < count; ++i) {
+                pArray[i].pNext = static_cast<VkBaseOutStructure*>(static_cast<void*>(nullptr));
+            }
+        }
+        pfnCb(count, p, pUser);
+    },
+};
+} // namespace video_profile_1
+
+static const VpVideoProfileDesc videoProfileDesc[] = {
+    {
+        { "H.264 Decode (4:2:0 8-bit) Main progressive" },
+        static_cast<uint32_t>(std::size(video_profile_1::infoStructTypes)), video_profile_1::infoStructTypes,
+        video_profile_1::infoDesc,
+        static_cast<uint32_t>(std::size(video_profile_1::capabilityStructTypes)), video_profile_1::capabilityStructTypes,
+        video_profile_1::capabilityDesc,
+        static_cast<uint32_t>(std::size(video_profile_1::formatStructTypes)), video_profile_1::formatStructTypes,
+        static_cast<uint32_t>(std::size(video_profile_1::formatDesc)), video_profile_1::formatDesc,
+        video_profile_1::chainerDesc,
+    },
+};
+} // namespace baseline
+} // namespace blocks
+} // namespace VP_VPA_TEST_VIDEO
+#endif // VP_VPA_test_video
+
 
 #ifdef VP_VPA_test_fallback
 namespace VP_VPA_TEST_FALLBACK {
@@ -2236,6 +2549,56 @@ namespace VP_VPA_TEST_VARIANTS_SUPPORTED {
 } // namespace VP_VPA_TEST_VARIANTS_SUPPORTED
 #endif //VP_VPA_test_variants_supported
 
+#ifdef VP_VPA_test_video
+namespace VP_VPA_TEST_VIDEO {
+    static const VpVariantDesc mergedCapabilities[] = {
+        {
+        "MERGED",
+        0, nullptr,
+        static_cast<uint32_t>(std::size(deviceExtensions)), deviceExtensions,
+        0, nullptr,
+            featureDesc,
+        0, nullptr,
+            propertyDesc,
+        0, nullptr,
+        0, nullptr,
+        0, nullptr,
+        0, nullptr,
+        chainerDesc,
+        0, nullptr,
+        },
+    };
+
+    namespace blocks {
+        namespace baseline {
+            static const VpVariantDesc variants[] = {
+                {
+                    "baseline",
+                    0, nullptr,
+                    static_cast<uint32_t>(std::size(blocks::baseline::deviceExtensions)), blocks::baseline::deviceExtensions,
+                    0, nullptr,
+                    blocks::baseline::featureDesc,
+                    0, nullptr,
+                    blocks::baseline::propertyDesc,
+                    static_cast<uint32_t>(std::size(queueFamilyStructTypes)), queueFamilyStructTypes,
+                    static_cast<uint32_t>(std::size(blocks::baseline::queueFamilyDesc)), blocks::baseline::queueFamilyDesc,
+                    0, nullptr,
+                    0, nullptr,
+                    blocks::baseline::chainerDesc,
+                    static_cast<uint32_t>(std::size(blocks::baseline::videoProfileDesc)), blocks::baseline::videoProfileDesc,
+                },
+            };
+            static const uint32_t variantCount = static_cast<uint32_t>(std::size(variants));
+        } // namespace baseline
+    } // namespace blocks
+
+    static const VpCapabilitiesDesc capabilities[] = {
+        { blocks::baseline::variantCount, blocks::baseline::variants },
+    };
+    static const uint32_t capabilityCount = static_cast<uint32_t>(std::size(capabilities));
+} // namespace VP_VPA_TEST_VIDEO
+#endif //VP_VPA_test_video
+
 static const VpProfileDesc profiles[] = {
 #ifdef VP_VPA_test_fallback
     VpProfileDesc{
@@ -2327,6 +2690,16 @@ static const VpProfileDesc profiles[] = {
         0, nullptr,
     },
 #endif // VP_VPA_TEST_VARIANTS_SUPPORTED
+#ifdef VP_VPA_test_video
+    VpProfileDesc{
+        VpProfileProperties{ VP_VPA_TEST_VIDEO_NAME, VP_VPA_TEST_VIDEO_SPEC_VERSION },
+        VP_VPA_TEST_VIDEO_MIN_API_VERSION,
+        VP_VPA_TEST_VIDEO::mergedCapabilities,
+        0, nullptr,
+        VP_VPA_TEST_VIDEO::capabilityCount, VP_VPA_TEST_VIDEO::capabilities,
+        0, nullptr,
+    },
+#endif // VP_VPA_TEST_VIDEO
 };
 static const uint32_t profileCount = static_cast<uint32_t>(std::size(profiles));
 

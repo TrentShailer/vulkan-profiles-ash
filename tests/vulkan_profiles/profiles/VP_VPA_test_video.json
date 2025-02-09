@@ -1,0 +1,97 @@
+{
+    "$schema": "https://schema.khronos.org/vulkan/profiles-0.8.2-304.json#",
+    "capabilities": {
+        "baseline": {
+            "extensions": {
+                "VK_KHR_video_queue": 1,
+                "VK_KHR_video_decode_queue": 1,
+                "VK_KHR_video_decode_h264": 1
+            },
+            "queueFamiliesProperties": [
+                {
+                    "VkQueueFamilyProperties": {
+                        "queueCount": 1,
+                        "queueFlags": [
+                            "VK_QUEUE_VIDEO_DECODE_BIT_KHR"
+                        ]
+                    },
+                    "VkQueueFamilyVideoPropertiesKHR": {
+                        "videoCodecOperations": [
+                            "VK_VIDEO_CODEC_OPERATION_DECODE_H264_BIT_KHR"
+                        ]
+                    }
+                }
+            ],
+            "videoProfiles": [
+                {
+                    "profile": {
+                        "VkVideoProfileInfoKHR": {
+                            "videoCodecOperation": "VK_VIDEO_CODEC_OPERATION_DECODE_H264_BIT_KHR",
+                            "chromaSubsampling": [
+                                "VK_VIDEO_CHROMA_SUBSAMPLING_420_BIT_KHR"
+                            ],
+                            "lumaBitDepth": [
+                                "VK_VIDEO_COMPONENT_BIT_DEPTH_8_BIT_KHR"
+                            ],
+                            "chromaBitDepth": [
+                                "VK_VIDEO_COMPONENT_BIT_DEPTH_8_BIT_KHR"
+                            ]
+                        },
+                        "VkVideoDecodeH264ProfileInfoKHR": {
+                            "stdProfileIdc": "STD_VIDEO_H264_PROFILE_IDC_MAIN",
+                            "pictureLayout": "VK_VIDEO_DECODE_H264_PICTURE_LAYOUT_PROGRESSIVE_KHR"
+                        }
+                    },
+                    "capabilities": {
+                        "VkVideoCapabilitiesKHR": {
+                            "maxCodedExtent": {
+                                "width": 1920,
+                                "height": 1080
+                            },
+                            "maxDpbSlots": 17,
+                            "maxActiveReferencePictures": 16
+                        },
+                        "VkVideoDecodeH264CapabilitiesKHR": {
+                            "maxLevelIdc": "STD_VIDEO_H264_LEVEL_IDC_5_2"
+                        }
+                    },
+                    "formats": [
+                        {
+                            "VkVideoFormatPropertiesKHR": {
+                                "format": "VK_FORMAT_G8_B8R8_2PLANE_420_UNORM",
+                                "imageType": "VK_IMAGE_TYPE_2D",
+                                "imageUsageFlags": [
+                                    "VK_IMAGE_USAGE_VIDEO_DECODE_DPB_BIT_KHR"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "profiles": {
+        "VP_VPA_test_video": {
+            "version": 1,
+            "api-version": "1.2.0",
+            "label": "Video Profile",
+            "description": "Profile containing video profiles.",
+            "capabilities": [
+                "baseline"
+            ],
+            "contributors": {
+                "Trent Shailer": {
+                    "company": "N/A"
+                }
+            },
+            "history": [
+                {
+                    "revision": 1,
+                    "date": "2025-02-10",
+                    "author": "Trent Shailer",
+                    "comment": "Initial revision"
+                }
+            ]
+        }
+    }
+}

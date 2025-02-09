@@ -16,6 +16,21 @@ pub const FALLBACK_FALLBACK: &CStr = c"VP_VPA_test_fallback_fallback";
 pub const VARIANTS_SUPPORTED: &CStr = c"VP_VPA_test_variants_supported";
 pub const VARIANTS_DEVICE_UNSUPPORTED: &CStr = c"VP_VPA_test_variants_device_unsupported";
 pub const VARIANTS_INSTANCE_UNSUPPORTED: &CStr = c"VP_VPA_test_variants_instance_unsupported";
+pub const VIDEO: &CStr = c"VP_VPA_test_video";
+
+pub fn video_profile() -> vp::ProfileProperties {
+    vp::ProfileProperties::default()
+        .spec_version(1)
+        .profile_name(VIDEO)
+        .unwrap()
+}
+
+pub fn supported_profile() -> vp::ProfileProperties {
+    vp::ProfileProperties::default()
+        .spec_version(2)
+        .profile_name(SUPPORTED)
+        .unwrap()
+}
 
 pub fn all_expected_profiles_exist(
     expected: &[vp::ProfileProperties],

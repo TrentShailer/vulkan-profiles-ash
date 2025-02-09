@@ -72,7 +72,7 @@
     },
     "profiles": {
         "VP_VPA_test_supported": {
-            "version": 1,
+            "version": 2,
             "api-version": "1.2.0",
             "label": "Supported Profile",
             "description": "Profile that the test instance and device support.",
@@ -90,6 +90,12 @@
                     "date": "2025-01-09",
                     "author": "Trent Shailer",
                     "comment": "Initial revision"
+                },
+                {
+                    "revision": 2,
+                    "date": "2025-02-09",
+                    "author": "Trent Shailer",
+                    "comment": "Add queue family requirements"
                 }
             ]
         }
