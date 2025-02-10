@@ -12,7 +12,6 @@ use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use vp_ash::vp;
 
 const TRY_DEBUG: bool = true;
-// Maximum memory = (2^26 * 2) + (((2^26 / (64 * 4)) * (64 / 4)) * 2) = 142606336
 const BUFFER_VALUES: u32 = 2u32.pow(26);
 const COMMAND_BUFFER_COUNT: u32 = 3;
 
@@ -410,12 +409,12 @@ fn main() {
 
     // Create data
     let data = {
-        let true_max_index = rand::thread_rng().gen_range(0..BUFFER_VALUES as usize);
+        let true_max_index = rand::rng().random_range(0..BUFFER_VALUES as usize);
 
-        let distribution = rand_distr::Uniform::new(i32::MIN, i32::MAX); // Excludes i32::MAX
+        let distribution = rand_distr::Uniform::new(i32::MIN, i32::MAX).unwrap(); // Excludes i32::MAX
         let data: Vec<_> = (0..BUFFER_VALUES as usize)
             .into_par_iter()
-            .map_init(rand::thread_rng, |rng, index| {
+            .map_init(rand::rng, |rng, index| {
                 if index == true_max_index {
                     i32::MAX
                 } else {
