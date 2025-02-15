@@ -9,7 +9,7 @@ in Rust for [ash](https://github.com/ash-rs/ash). Using the beta Capabilities AP
 >
 
 ## Restrictions:
-* Bindings are written against the [Vulkan Profiles Tools included in Vulkan SDK 1.3.296](https://github.com/KhronosGroup/Vulkan-Profiles/tree/v1.3.296).
+* Bindings are written against the [Vulkan Profiles Tools included in Vulkan SDK 1.4.304](https://github.com/KhronosGroup/Vulkan-Profiles/tree/v1.4.304).
 * Requires statically linking the Vulkan Profiles API and Vulkan.
 * Uses the Beta Capabilities API for Vulkan Profiles API.
 * The `--output-library-inc` must be the `--output-library-src + /vulkan`.
