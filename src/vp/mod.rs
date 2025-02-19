@@ -2,6 +2,7 @@ pub use functions::*;
 pub use structs::*;
 
 mod functions;
+#[cfg(feature = "linked")]
 pub(crate) mod linked;
 mod structs;
 

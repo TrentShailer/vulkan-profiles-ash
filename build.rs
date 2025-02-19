@@ -1,6 +1,29 @@
 use std::{env, path::Path};
 
 fn main() {
+    #[cfg(feature = "linked")]
+    link_vulkan_profiles();
+
+    // Add 'fake' Vulkan Functions for testing.
+    #[cfg(feature = "test")]
+    link_mock_vulkan()
+}
+
+#[cfg(feature = "test")]
+fn link_mock_vulkan() {
+    let vulkan_sdk = Path::new(env!("VULKAN_SDK"));
+    let vulkan_include_dir = vulkan_sdk.join("Include");
+
+    cc::Build::new()
+        .file("tests/common/mock_vulkan_api.cpp")
+        .cpp(true)
+        .std("c++17")
+        .include(&vulkan_include_dir)
+        .compile("mock_vulkan_api");
+}
+
+#[cfg(feature = "linked")]
+fn link_vulkan_profiles() {
     // Rerun on env change.
     println!("cargo:rerun-if-env-changed=VULKAN_SDK");
     println!("cargo:rerun-if-env-changed=VULKAN_PROFILES_PATH");
@@ -77,13 +100,4 @@ fn main() {
 
     // Compile the library.
     build.compile("vulkan_profiles_ash");
-
-    // Add 'fake' Vulkan Functions for testing.
-    #[cfg(feature = "test")]
-    cc::Build::new()
-        .file("tests/common/mock_vulkan_api.cpp")
-        .cpp(true)
-        .std("c++17")
-        .include(&vulkan_include_dir)
-        .compile("mock_vulkan_api");
 }
