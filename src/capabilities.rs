@@ -18,6 +18,7 @@ pub struct Capabilities {
 
 impl Capabilities {
     /// Create the [`Capabilities`] object using a handle and statically linked function pointers.
+    #[cfg(feature = "linked")]
     pub fn linked(handle: vp::Capabilities) -> Self {
         Self {
             handle,
@@ -559,6 +560,7 @@ pub struct CapabilitiesFn {
 
 impl CapabilitiesFn {
     /// Load the function pointers from the statically linked library.
+    #[cfg(feature = "linked")]
     pub(crate) fn linked() -> Self {
         Self {
             destroy_capabilities: vp::linked::vpDestroyCapabilities,

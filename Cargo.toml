@@ -1,6 +1,6 @@
 [package]
 name = "vp-ash"
-version = "0.3.0+1.4.304"
+version = "0.4.0+1.4.304"
 authors = ["Trent Shailer <trent.shailer@gmail.com>"]
 description = "Vulkan Profiles API bindings for Ash"
 license = "MIT OR Apache-2.0"
@@ -17,16 +17,20 @@ rand = "0.9"
 
 [build-dependencies]
 
-cc = { version = "1.2" } # Compile the Vulkan Profiles library to be statically linked.
+cc = { version = "1.2", optional = true } # Compile the Vulkan Profiles library to be statically linked.
 
 [features]
-default = ["link_vulkan", "debug", "std"]
+default = ["linked", "link_vulkan", "debug", "std"]
 
+linked = ["cc"]              # Statically link the Vulkan Profiles Library.
 link_vulkan = ["ash/linked"] # Statically link Vulkan.
 debug = ["ash/debug"]        # Enable structs to derive Debug.
 std = ["ash/std"]            # Enable std support.
 
-test = ["default"]    # Enable code paths in build.rs for testing the library.
+test = [
+    "default",
+    "VK_KHR_video_queue",
+] # Enable code paths in build.rs for testing the library.
 example = ["default"] # Enable code paths in build.rs for running the example.
 
 # Vulkan profiles feature flags
